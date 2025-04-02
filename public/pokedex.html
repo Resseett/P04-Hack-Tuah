@@ -10,6 +10,25 @@
       margin: 0;
       font-family: Arial, sans-serif;
     }
+    nav {
+      background-color: #333;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    .nav-links {
+      display: flex;
+    }
     main {
       text-align: center;
       margin-top: 50px;
@@ -32,6 +51,14 @@
   <main>
     <h1>Pokedex</h1>
     <p>Aquí puedes explorar todas las cartas de Pokémon disponibles.</p>
+  
+    <input type="text" id="cardId" placeholder="Ingresa ID de carta (ej: xy7-54)" />
+    <button onclick="buscarCarta()">Buscar Carta</button>
+  
+    <div id="resultado"></div>
   </main>
+  
+  <script src="/js/script.js"></script>
+  
 </body>
 </html>
