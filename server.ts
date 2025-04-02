@@ -95,6 +95,21 @@ router.post("/api/logout", async (ctx) => {
     ctx.response.body = { success: true };
 });
 
+router.get("/card/:id", async (ctx) => {
+    const cardId = ctx.params.id;
+    const apiUrl = `https://api.pokemontcg.io/v2/cards/${cardId}`;
+
+    try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        ctx.response.headers.set("Content-Type", "application/json");
+        ctx.response.body = data;
+    } catch (error) {
+        ctx.response.status = 500;
+        ctx.response.body = { error: "Error al obtener la carta" };
+    }
+});
+
 
 app.use(router.routes());
 app.use(router.allowedMethods());
