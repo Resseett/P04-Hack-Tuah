@@ -4,34 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pokedex - Pókedex de Cartas de Pokémon</title>
-  <style>
-    /* Estilos básicos */
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-    main {
-      text-align: center;
-      margin-top: 50px;
-    }
-  </style>
+  <link rel="stylesheet" href="/components/styles.css">
 </head>
 <body>
-  <nav>
-    <div class="logo">
-      <a href="/pokedex">Pokedex</a>
-    </div>
-    <div class="nav-links">
-      <a href="/upload">Escanear Cartas</a>
-      <a href="/inventory">Inventario</a>
-      <a href="/trade">Intercambio</a>
-      <a href="/stats">Estadísticas</a>
-      <a href="/login">Ir a Login</a>
-    </div>
-  </nav>
+  <div id="navbar"></div>
   <main>
     <h1>Pokedex</h1>
     <p>Aquí puedes explorar todas las cartas de Pokémon disponibles.</p>
   </main>
 </body>
 </html>
+
+<script>
+  // Cargar la navbar desde navbar.html
+  fetch('/components/navbar.html')
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById('navbar').innerHTML = data;
+    })
+    .catch(error => console.error('Error al cargar la navbar:', error));
+</script>

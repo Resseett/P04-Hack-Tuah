@@ -27,6 +27,10 @@ router.get("/pokedex", async (ctx) => {
     await send(ctx, "pokedex.html", { root: `${Deno.cwd()}/public` });
 });
 
+router.get("/inventory", async (ctx) => {
+    await send(ctx, "inventory.html", { root: `${Deno.cwd()}/public` });
+});
+
 app.use(router.routes());
 app.use(router.allowedMethods());
 
