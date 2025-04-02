@@ -33,6 +33,12 @@
       text-align: center;
       margin-top: 50px;
     }
+    #userStatus {
+      margin-bottom: 20px;
+    }
+    #logoutBtn {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -45,12 +51,15 @@
       <a href="/inventory">Inventario</a>
       <a href="/trade">Intercambio</a>
       <a href="/stats">Estadísticas</a>
-      <a href="/login">Ir a Login</a>
+      <a href="/login" id="loginBtn">Ir a Login</a>
+      <button id="logoutBtn">Salir</button>
     </div>
   </nav>
   <main>
     <h1>Bienvenido a la Pókedex de Cartas de Pokémon</h1>
     <p>Explora, organiza y gestiona tu colección de cartas de Pokémon.</p>
+    <p id="userStatus">Cargando...</p>
   </main>
+  <script src="/js/auth.js"></script>
 </body>
 </html>
