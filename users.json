@@ -1,4 +1,18 @@
 [
-  { "username": "ash", "password": "pikachu" },
-  { "username": "misty", "password": "togepi" }
+  {
+    "username": "bumblebee",
+    "password": "$2a$10$YPp00NpzDTLz0kIBI1i6qeFpRXKpii9Vloh.fYwlodcWRbPqGzIXW"
+  },
+  {
+    "username": "ash",
+    "password": "$2a$10$IkbfQYXavMaetQY5z4jW/u83MlBnQ2Ch2XnIiDj29YfX0RdB7lS72"
+  },
+  {
+    "username": "misty",
+    "password": "$2a$10$zL2PxZosDwHlMkiFjnVT3ON7/x6x65BSnpif6oceTplTmTPApeFIS"
+  },
+  {
+    "username": "ltsurge",
+    "password": "$2a$10$YYkMzb/A81xgqSp7Kuvg2uYwHsHdMYIg8V1FmCRSMVxdRJbu0FHfq"
+  }
 ]

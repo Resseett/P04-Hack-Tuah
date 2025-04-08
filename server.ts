@@ -2,6 +2,9 @@ import { Application, Router, send } from "https://deno.land/x/oak@v12.6.1/mod.t
 
 import { setCookie, getCookies } from "https://deno.land/std/http/cookie.ts";
 
+import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
+
+
 // Cargar usuarios desde JSON
 const users = JSON.parse(await Deno.readTextFile("users.json"));
 console.log("Usuarios cargados:", users);
@@ -26,11 +29,62 @@ router.get("/login", async (ctx) => {
     await send(ctx, "public/login.html", { root: Deno.cwd() });
 });
 
+router.get("/signup", async (ctx) => {
+    await send(ctx, "public/signup.html", { root: Deno.cwd() });
+  });
+
 router.get("/pokedex", async (ctx) => {
     await send(ctx, "public/pokedex.html", { root: Deno.cwd() });
 });
 
-// Actualización de la ruta /api/login con cookies
+// Ruta para registrar un nuevo usuario
+router.post("/api/signup", async (ctx) => {
+    try {
+      const body = ctx.request.body({ type: "json" });
+      const data = await body.value;
+  
+      const { username, password } = data;
+  
+      if (!username || !password) {
+        ctx.response.status = 400;
+        ctx.response.body = { success: false, message: "Usuario y contraseña requeridos." };
+        return;
+      }
+  
+      // ❌ Verificar que no tenga espacios
+      if (/\s/.test(username)) {
+        ctx.response.status = 400;
+        ctx.response.body = { success: false, message: "El nombre de usuario no puede contener espacios." };
+        return;
+      }
+  
+      // ❌ Verificar si ya existe (case insensitive)
+      const exists = users.find((u: any) => u.username.toLowerCase() === username.toLowerCase());
+      if (exists) {
+        ctx.response.status = 409;
+        ctx.response.body = { success: false, message: "Usuario ya registrado." };
+        return;
+      }
+  
+      // ✅ Cifrar la contraseña
+      const hashedPassword = await bcrypt.hash(password);
+  
+      users.push({ username, password: hashedPassword });
+      await Deno.writeTextFile("users.json", JSON.stringify(users, null, 2));
+  
+      ctx.response.status = 201;
+      ctx.response.body = { success: true, message: "Usuario registrado exitosamente." };
+    } catch (error) {
+      console.error("Error al registrar usuario:", error);
+      ctx.response.status = 500;
+      ctx.response.body = { success: false, message: "Error en el servidor." };
+    }
+  });
+  
+  
+
+// /api/login con cookies
+
 router.post("/api/login", async (ctx) => {
     try {
         console.log("Recibiendo petición de login...");
@@ -47,23 +101,33 @@ router.post("/api/login", async (ctx) => {
         console.log("Datos recibidos:", data);
 
         const { username, password } = data;
-        const user = users.find((u: any) => u.username === username && u.password === password);
+
+        const user = users.find((u: any) => u.username === username);
 
         if (user) {
-            console.log(`✅ Usuario ${username} autenticado`);
+            // ✅ Comparar contraseña cifrada con bcrypt
+            const passwordMatch = await bcrypt.compare(password, user.password);
 
-            // 🔥 Agregar cookie para sesión
-            setCookie(ctx.response.headers, {
-                name: "loggedInUser",
-                value: username,
-                httpOnly: true,
-                maxAge: 60 * 60 * 24, // 1 día
-            });
+            if (passwordMatch) {
+                console.log(`✅ Usuario ${username} autenticado`);
 
-            ctx.response.status = 200;
-            ctx.response.body = { success: true };
+                // 🔥 Agregar cookie para sesión
+                setCookie(ctx.response.headers, {
+                    name: "loggedInUser",
+                    value: username,
+                    httpOnly: true,
+                    maxAge: 60 * 60 * 24, // 1 día
+                });
+
+                ctx.response.status = 200;
+                ctx.response.body = { success: true };
+            } else {
+                console.log("❌ Contraseña incorrecta");
+                ctx.response.status = 401;
+                ctx.response.body = { success: false, message: "Credenciales incorrectas" };
+            }
         } else {
-            console.log("❌ Credenciales incorrectas");
+            console.log("❌ Usuario no encontrado");
             ctx.response.status = 401;
             ctx.response.body = { success: false, message: "Credenciales incorrectas" };
         }
@@ -73,6 +137,7 @@ router.post("/api/login", async (ctx) => {
         ctx.response.body = { success: false, message: "Error en el servidor" };
     }
 });
+
 
 // Ruta para verificar sesión
 router.get("/api/session", async (ctx) => {
