@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escanear Cartas</title>
+  <link rel="stylesheet" href="/components/pokedex_styles.css">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <main>
+    <h1 class="gradient-text">Escanear Cartas</h1>
+    <p>Sube una imagen de una carta para comenzar el escaneo.</p>
+
+    <input type="file" id="imageInput" accept="image/*" />
+
+    <div id="previewContainer">
+      <img id="imagePreview" src="" alt="Vista previa" style="display:none;" />
+    </div>
+  </main>
+
+  <script src="/js/navbar.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+
+    imageInput.addEventListener('change', () => {
+      const file = imageInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          imagePreview.src = e.target.result;
+          imagePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -37,6 +37,10 @@ router.get("/pokedex", async (ctx) => {
     await send(ctx, "public/pokedex.html", { root: Deno.cwd() });
 });
 
+router.get("/scan", async (ctx) => {
+    await send(ctx, "public/scan.html", { root: Deno.cwd() });
+  });
+
 // Ruta para registrar un nuevo usuario
 router.post("/api/signup", async (ctx) => {
     try {

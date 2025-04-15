@@ -18,5 +18,13 @@
   {
     "username": "Steven",
     "password": "$2a$10$0dmac6Cl7v0u8Fz2IGvKd.tGsE.afPF2v4CzOsFm9hkrBZyfUq1M6"
+  },
+  {
+    "username": "pikachu",
+    "password": "$2a$10$elNmRUv0NzapcTCG3uq2auqSujNFznPjvAigE0jeIC9QG9whHku9y"
+  },
+  {
+    "username": "staryu",
+    "password": "$2a$10$yLeUTgnuYnro2lC2GSi3IOWlY2/wMNPqda9OZVfptZM5n98JmN306"
   }
 ]

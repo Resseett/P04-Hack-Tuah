@@ -4,145 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pokedex - Pókedex de Cartas de Pokémon</title>
-  <style>
-    /* Estilos básicos */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f0f8ff;
-    }
-
-    nav {
-      background: linear-gradient(90deg, #ff1e56, #ffac41);
-      color: white;
-      padding: 20px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .logo a {
-      font-size: 1.8em;
-      font-weight: bold;
-      color: white;
-      text-decoration: none;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 20px;
-    }
-
-    nav a {
-      color: white;
-      text-decoration: none;
-      font-size: 1.1em;
-      padding: 8px 12px;
-      border-radius: 10px;
-      transition: background-color 0.3s ease;
-    }
-
-    nav a:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-
-    main {
-      text-align: center;
-      margin-top: 60px;
-      padding: 20px;
-    }
-
-    h1 {
-      font-size: 3em;
-      color: #ff1e56;
-    }
-
-    p {
-      font-size: 1.2em;
-      color: #333;
-      margin-bottom: 30px;
-    }
-
-    input[type="text"] {
-      padding: 10px;
-      width: 250px;
-      font-size: 1em;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      margin-right: 10px;
-    }
-
-    button {
-      padding: 10px 20px;
-      background-color: #ff1e56;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1em;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #e0144c;
-    }
-
-    #resultado {
-      margin-top: 30px;
-    }
-    #resultado {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
-      justify-items: center;
-      margin-top: 30px;
-      padding: 0 20px;
-    }
-
-    .carta {
-      background-color: white;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      max-width: 220px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      text-align: center;
-      transition: transform 0.3s;
-    }
-
-    .carta:hover {
-      transform: scale(1.05);
-    }
-
-    .carta img {
-      width: 100%;
-      border-radius: 8px;
-    }
-  </style>
+  <link rel="stylesheet" href="/components/pokedex_styles.css">
 </head>
 <body>
-  <nav>
-    <div class="logo">
-      <a href="/pokedex">Pokedex</a>
-    </div>
-    <div class="nav-links">
-      <a href="/upload">Escanear Cartas</a>
-      <a href="/inventory">Inventario</a>
-      <a href="/trade">Intercambio</a>
-      <a href="/stats">Estadísticas</a>
-      <a href="/login">Ir a Login</a>
-    </div>
-  </nav>
+  <div id="navbar"></div>
   <main>
     <h1>Pokedex</h1>
     <p>Aquí puedes explorar todas las cartas de Pokémon disponibles.</p>
+    <p id="welcomeText">¿Qué carta buscas hoy día?</p>
   
     <input type="text" id="cardId" placeholder="Ingresa ID del set (ej: xy7)" />
     <button onclick="buscarCarta()">Buscar Set</button>
     <div id="resultado"></div>
   </main>
   
+  <script src="/js/navbar.js"></script>
+  <script src="/js/auth.js"></script>
   <script src="/js/script.js"></script>
 </body>
 </html>
