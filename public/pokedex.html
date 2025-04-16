@@ -21,5 +21,28 @@
   <script src="/js/navbar.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const resultsDiv = document.getElementById('resultado');
+      const searchResults = JSON.parse(sessionStorage.getItem('searchResults'));
+
+      if (searchResults && searchResults.length > 0) {
+        searchResults.forEach(carta => {
+          const cartaDiv = document.createElement('div');
+          cartaDiv.className = 'carta';
+
+          cartaDiv.innerHTML = `
+            <h3>${carta.name}</h3>
+            <img src="${carta.images.large}" alt="${carta.name}" />
+            <p><strong>Tipo:</strong> ${carta.types?.join(", ") || "Desconocido"}</p>
+          `;
+
+          resultsDiv.appendChild(cartaDiv);
+        });
+      } else {
+        resultsDiv.innerHTML = "<p>❌ No se encontraron resultados.</p>";
+      }
+    });
+  </script>
 </body>
 </html>

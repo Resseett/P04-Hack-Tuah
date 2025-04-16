@@ -26,5 +26,9 @@
   {
     "username": "staryu",
     "password": "$2a$10$yLeUTgnuYnro2lC2GSi3IOWlY2/wMNPqda9OZVfptZM5n98JmN306"
+  },
+  {
+    "username": "asdf",
+    "password": "$2a$10$ez2WSTpyZXHKnPHeUzZTe.KCoXhMc/1aeWgEo0X9fBpHuBAwkt/pO"
   }
 ]
