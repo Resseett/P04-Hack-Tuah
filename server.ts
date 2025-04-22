@@ -41,6 +41,10 @@ router.get("/scan", async (ctx) => {
     await send(ctx, "public/scan.html", { root: Deno.cwd() });
   });
 
+router.get("/inventory", async (ctx) => {
+    await send(ctx, "public/inventory.html", { root: Deno.cwd() });
+});
+
 // Ruta para registrar un nuevo usuario
 router.post("/api/signup", async (ctx) => {
     try {
@@ -177,6 +181,62 @@ router.get("/card/:id", async (ctx) => {
         ctx.response.status = 500;
         ctx.response.body = { error: "Error al obtener la carta" };
     }
+});
+
+let inventories = {};
+try {
+  inventories = JSON.parse(await Deno.readTextFile("inventories.json"));
+} catch {
+  inventories = {};
+}
+
+// Guardar inventarios en disco
+async function saveInventories() {
+  await Deno.writeTextFile("inventories.json", JSON.stringify(inventories, null, 2));
+}
+
+// Ruta para obtener inventario del usuario actual
+router.get("/api/inventory", async (ctx) => {
+  const cookies = getCookies(ctx.request.headers);
+  const username = cookies.loggedInUser;
+
+  if (!username) {
+    ctx.response.status = 401;
+    ctx.response.body = { success: false, message: "No autenticado." };
+    return;
+  }
+
+  const userInventory = inventories[username] || [];
+  ctx.response.body = { success: true, cards: userInventory };
+});
+
+// Ruta para agregar carta al inventario
+router.post("/api/inventory/add", async (ctx) => {
+  const cookies = getCookies(ctx.request.headers);
+  const username = cookies.loggedInUser;
+
+  if (!username) {
+    ctx.response.status = 401;
+    ctx.response.body = { success: false, message: "No autenticado." };
+    return;
+  }
+
+  const body = ctx.request.body({ type: "json" });
+  const { cardId } = await body.value;
+
+  if (!cardId) {
+    ctx.response.status = 400;
+    ctx.response.body = { success: false, message: "ID de carta requerido." };
+    return;
+  }
+
+  if (!inventories[username]) inventories[username] = [];
+
+  // Permitir cartas repetidas (puedes ajustar si no quieres eso)
+  inventories[username].push(cardId);
+  await saveInventories();
+
+  ctx.response.body = { success: true, message: "Carta añadida al inventario." };
 });
 
 
