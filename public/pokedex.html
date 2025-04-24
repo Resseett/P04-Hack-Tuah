@@ -13,8 +13,8 @@
     <p>Aquí puedes explorar todas las cartas de Pokémon disponibles.</p>
     <p id="welcomeText">¿Qué carta buscas hoy día?</p>
   
-    <input type="text" id="cardId" placeholder="Ingresa ID del set (ej: xy7)" />
-    <button onclick="buscarCarta()">Buscar Set</button>
+    <input type="text" id="cardId" placeholder="Ingresa el nombre de la carta" />
+    <button onclick="buscarCarta()">Buscar Carta</button>
     <div id="resultado"></div>
   </main>
   
@@ -35,6 +35,13 @@
             <h3>${carta.name}</h3>
             <img src="${carta.images.large}" alt="${carta.name}" />
             <p><strong>Tipo:</strong> ${carta.types?.join(", ") || "Desconocido"}</p>
+            <p><strong>Precio:</strong> 
+              ${
+                carta.tcgplayer?.prices?.normal?.market
+                  ? `$${carta.tcgplayer.prices.normal.market.toFixed(2)}`
+                  : "No disponible"
+              }
+            </p>
           `;
 
           resultsDiv.appendChild(cartaDiv);
