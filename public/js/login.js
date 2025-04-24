@@ -9,7 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const response = await fetch("/api/login", {
             method: "POST",
-            headers: { "Content-Type": "application/json" }, // 🔥 Asegurar que sea JSON
+            headers: { "Content-Type": "application/json" },
+            credentials: "include", // 🔥 Asegurar que las cookies se envíen y reciban
             body: JSON.stringify({ username, password })
         });
 

@@ -1,8 +1,38 @@
 {
-    "ash": [
-      "x7-54",
-      "xy7-54",
-      "xy6-22",
-      "xy5-23"
-    ]
+  "ash": [
+    {
+      "id": "xy7-54",
+      "quantity": 1
+    },
+    {
+      "id": "xy6-22",
+      "quantity": 1
+    },
+    {
+      "id": "xy5-23",
+      "quantity": 1
+    }
+  ],
+  "asdf": [
+    {
+      "id": "xy7-53",
+      "quantity": 4
+    },
+    {
+      "id": "xy6-30",
+      "quantity": 3
+    },
+    {
+      "id": "xy7-22",
+      "quantity": 5
+    },
+    {
+      "id": "xy7-33",
+      "quantity": 4
+    },
+    {
+      "id": "xy7-44",
+      "quantity": 4
+    }
+  ]
 }

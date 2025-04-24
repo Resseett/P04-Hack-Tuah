@@ -124,7 +124,9 @@ router.post("/api/login", async (ctx) => {
                     name: "loggedInUser",
                     value: username,
                     httpOnly: true,
-                    maxAge: 60 * 60 * 24, // 1 día
+                    sameSite: "Lax", // Permitir navegación entre páginas del mismo dominio
+                    secure: false, // Cambiar a true si usas HTTPS
+                    maxAge: 60 * 60 * 24 * 7, // 7 días
                 });
 
                 ctx.response.status = 200;
@@ -145,7 +147,45 @@ router.post("/api/login", async (ctx) => {
         ctx.response.body = { success: false, message: "Error en el servidor" };
     }
 });
+router.post("/api/inventory/update", async (ctx) => {
+  try {
+    const { cardId, quantity } = await ctx.request.body({ type: "json" }).value;
 
+    if (!cardId || !quantity || quantity < 1) {
+      ctx.response.status = 400;
+      ctx.response.body = { success: false, message: "Datos inválidos." };
+      return;
+    }
+
+    // 🔥 Usar getCookies para obtener la cookie
+    const cookies = getCookies(ctx.request.headers);
+    const username = cookies.loggedInUser;
+
+    if (!username || !inventories[username]) {
+      ctx.response.status = 401;
+      ctx.response.body = { success: false, message: "Usuario no autenticado." };
+      return;
+    }
+
+    // Actualizar la cantidad en el inventario
+    inventories[username] = inventories[username].map((card) =>
+      typeof card === "string"
+        ? card // Si es un string, no lo modifica
+        : card.id === cardId
+        ? { ...card, quantity }
+        : card
+    );
+
+    // Guardar los cambios en el archivo
+    await saveInventories();
+
+    ctx.response.body = { success: true };
+  } catch (err) {
+    console.error("Error al actualizar el inventario:", err);
+    ctx.response.status = 500;
+    ctx.response.body = { success: false, message: "Error interno del servidor." };
+  }
+});
 
 // Ruta para verificar sesión
 router.get("/api/session", async (ctx) => {
@@ -192,7 +232,12 @@ try {
 
 // Guardar inventarios en disco
 async function saveInventories() {
-  await Deno.writeTextFile("inventories.json", JSON.stringify(inventories, null, 2));
+  try {
+    await Deno.writeTextFile("inventories.json", JSON.stringify(inventories, null, 2));
+    console.log("Inventario guardado correctamente.");
+  } catch (err) {
+    console.error("Error al guardar el inventario:", err);
+  }
 }
 
 // Ruta para obtener inventario del usuario actual
@@ -232,8 +277,25 @@ router.post("/api/inventory/add", async (ctx) => {
 
   if (!inventories[username]) inventories[username] = [];
 
-  // Permitir cartas repetidas (puedes ajustar si no quieres eso)
-  inventories[username].push(cardId);
+  // Verificar si la carta ya existe en el inventario
+  const existingCard = inventories[username].find(
+    (card) => typeof card !== "string" && card.id === cardId
+  );
+
+  if (existingCard) {
+    // Si ya existe, incrementar la cantidad
+    existingCard.quantity += 1;
+  } else {
+    // Si no existe, agregarla con quantity: 1
+    inventories[username].push({ id: cardId, quantity: 1 });
+  }
+
+  // Filtrar y eliminar cualquier entrada que sea un string (formato incorrecto)
+  inventories[username] = inventories[username].filter(
+    (card) => typeof card === "object" && card.id
+  );
+
+  // Guardar los cambios en el archivo
   await saveInventories();
 
   ctx.response.body = { success: true, message: "Carta añadida al inventario." };
