@@ -28,17 +28,17 @@ async function renderInventory() {
         try {
             const cardDetails = await fetchCardDetails(card.id); // card.id en lugar de id
             const cardHTML = `
-                <div class="col">
-                    <div class="card h-100">
+                <div class="col inventory-card-col">
+                    <div class="card h-100 inventory-card">
                         <img src="${cardDetails.images.small}" class="card-img-top" alt="${cardDetails.name}">
                         <div class="card-body">
                             <h5 class="card-title">${cardDetails.name}</h5>
                             <p class="card-text">ID: ${cardDetails.id}</p>
                             <p class="card-text">Tipo: ${cardDetails.supertype}</p>
-                            <div class="d-flex align-items-center">
-                                <label for="quantity-${cardDetails.id}" class="me-2">Cantidad:</label>
-                                <input type="number" id="quantity-${cardDetails.id}" class="form-control" style="width: 80px;" value="${card.quantity}" min="1">
-                                <button class="btn btn-primary ms-2" onclick="saveQuantity('${cardDetails.id}')">Guardar</button>
+                            <div class="d-flex align-items-center flex-wrap gap-2 justify-content-center">
+                                <label for="quantity-${cardDetails.id}" class="me-1 mb-0">Cantidad:</label>
+                                <input type="number" id="quantity-${cardDetails.id}" class="form-control form-control-sm quantity-input" style="width: 60px;" value="${card.quantity}" min="1">
+                                <button class="btn btn-primary btn-save-qty" id="saveBtn-${cardDetails.id}" onclick="saveQuantity('${cardDetails.id}')">Guardar</button>
                             </div>
                         </div>
                     </div>

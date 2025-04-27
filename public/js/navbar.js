@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const searchInput = document.getElementById('navbarSearch');
       const searchButton = document.getElementById('navbarSearchBtn');
+      const menuToggle = document.getElementById('menuToggle');
+      const navLinks = document.getElementById('navLinks');
+
+      menuToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+      });
 
       searchButton.addEventListener('click', async () => {
         const query = searchInput.value.trim();

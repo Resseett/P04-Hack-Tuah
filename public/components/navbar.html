@@ -2,16 +2,57 @@
   <div class="logo">
     <a href="/">CartasMagia</a>
   </div>
-  <div class="nav-links">
+  <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
+  <div class="nav-links" id="navLinks">
     <a href="/pokedex">Pokedex</a>
     <a href="/scan">Escanear Cartas</a>
     <a href="/inventory">Inventario</a>
     <a href="/trade">Intercambio</a>
-    <a href="/login" id="loginBtn">Ir a Login</a>
-    <button id="logoutBtn">Salir</button>
+    <a href="/login" id="loginBtn" class="responsive-btn">Ir a Login</a>
+    <button id="logoutBtn" class="responsive-btn">Salir</button>
   </div>
   <div class="search-bar">
     <input type="text" id="navbarSearch" placeholder="Buscar cartas..." />
     <button id="navbarSearchBtn">🔍</button>
   </div>
 </nav>
+<script>
+  function toggleMenu() {
+    const navLinks = document.getElementById('navLinks');
+    navLinks.style.display = navLinks.style.display === 'block' ? 'none' : 'block';
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Interceptar todos los clics en enlaces
+    document.body.addEventListener("click", (e) => {
+        const link = e.target.closest("a");
+        
+        if (link && link.href && !link.target && link.href.startsWith(window.location.origin)) {
+            // Mostrar toast de carga
+            showLoadingToast();
+        }
+    });
+});
+
+function showLoadingToast() {
+    const existingToast = document.getElementById("loading-toast");
+    if (existingToast) return; // No crear múltiples toasts
+
+    const toast = document.createElement("div");
+    toast.id = "loading-toast";
+    toast.className = "toast align-items-center text-bg-primary border-0 show";
+    toast.style.position = "fixed";
+    toast.style.bottom = "20px";
+    toast.style.right = "20px";
+    toast.style.zIndex = "9999";
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                Cargando...
+            </div>
+        </div>
+    `;
+    document.body.appendChild(toast);
+}
+</script>

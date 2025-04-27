@@ -29,35 +29,9 @@
     </div>
   </div>  
 
-  <script>
-    const form = document.getElementById("signupForm");
-    const msg = document.getElementById("signupMessage");
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const username = document.getElementById("newUser").value;
-      const password = document.getElementById("newPass").value;
-
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await res.json();
-
-      msg.textContent = data.message;
-      msg.classList.toggle("text-success", data.success);
-      msg.classList.toggle("text-danger", !data.success);
-
-      if (data.success) {
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 1500);
-      }
-    });
-  </script>
+  <script src="/js/signup.js"></script>
   <script src="/js/navbar.js"></script>
+  <script src="/js/auth.js"></script>
+  <div id="toast-root"></div>
 </body>
 </html>

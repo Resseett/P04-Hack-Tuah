@@ -12,6 +12,7 @@ nav {
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
 
 .logo a {
@@ -26,6 +27,10 @@ nav {
   gap: 20px;
 }
 
+.nav-links a {
+  display: block;
+}
+
 nav a {
   color: white;
   text-decoration: none;
@@ -37,6 +42,15 @@ nav a {
 
 nav a:hover {
   background-color: rgba(255, 255, 255, 0.2);
+}
+
+.menu-toggle {
+  display: none;
+  background-color: transparent;
+  border: none;
+  font-size: 1.5em;
+  color: white;
+  cursor: pointer;
 }
 
 main {
@@ -186,3 +200,295 @@ input.form-control {
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   }
   
+/* Estilos para pantallas medianas (tablets) */
+@media (max-width: 1024px) {
+  nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .nav-links a {
+    font-size: 0.9em;
+    padding: 6px 10px;
+  }
+
+  .search-bar {
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .search-bar input {
+    width: 60%;
+    font-size: 0.85em;
+  }
+
+  .search-bar button {
+    font-size: 0.85em;
+    padding: 5px 8px;
+  }
+
+  #logoutBtn, #loginBtn {
+    font-size: 0.85em;
+    padding: 6px 10px;
+  }
+
+  .carta {
+    max-width: 180px;
+    padding: 8px;
+  }
+
+  .carta img {
+    width: 100%;
+    border-radius: 6px;
+  }
+
+  .carta h3 {
+    font-size: 1em;
+  }
+
+  .carta p {
+    font-size: 0.9em;
+  }
+}
+
+/* Estilos para pantallas pequeñas (móviles) */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #333;
+    width: 100%;
+    padding: 10px 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+
+  .menu-toggle {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .search-bar {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .search-bar input {
+    width: 80%;
+    font-size: 0.8em;
+  }
+
+  .search-bar button {
+    font-size: 0.8em;
+    padding: 4px 6px;
+  }
+
+  main {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  button {
+    font-size: 0.9em;
+    padding: 8px 16px;
+  }
+
+  .carta {
+    max-width: 150px;
+    padding: 6px;
+  }
+
+  .carta img {
+    width: 100%;
+    border-radius: 5px;
+  }
+
+  .carta h3 {
+    font-size: 0.9em;
+  }
+
+  .carta p {
+    font-size: 0.8em;
+  }
+
+  #imageInput {
+    width: 100%;
+  }
+
+  #imagePreview {
+    max-width: 100%;
+    max-height: 300px;
+  }
+
+  #logoutBtn, #loginBtn {
+    font-size: 0.8em;
+    padding: 5px 8px;
+  }
+}
+
+/* Estilos para pantallas muy pequeñas (teléfonos) */
+@media (max-width: 480px) {
+  #resultado {
+    grid-template-columns: repeat(3, 1fr); /* Display 3 cards per row */
+    gap: 10px; /* Adjust gap for smaller screens */
+  }
+
+  .carta {
+    max-width: 100%; /* Ensure cards fit within the grid */
+    padding: 5px;
+  }
+
+  .carta img {
+    width: 100%; /* Ensure images fit within the card */
+    border-radius: 5px;
+  }
+
+  .carta h3 {
+    font-size: 0.8em; /* Adjust font size for titles */
+  }
+
+  .carta p {
+    font-size: 0.7em; /* Adjust font size for text */
+  }
+
+/* Ajustar el diseño del contenedor de inventario */
+#inventoryContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Más columnas en pantallas grandes */
+  gap: 20px;
+  justify-items: center;
+  margin-top: 30px;
+  padding: 0 20px;
+}
+
+/* Para pantallas entre 573px y 1281px */
+@media (min-width: 573px) and (max-width: 1281px) {
+  #inventoryContainer {
+    grid-template-columns: repeat(3, 1fr); /* Mostrar 3 columnas */
+  }
+}
+
+  .inventory-card {
+    max-width: 100%; /* Ensure cards fit within the grid */
+    padding: 5px;
+  }
+
+  .inventory-card img {
+    width: 100%; /* Ensure images fit within the card */
+    border-radius: 5px;
+  }
+
+  .inventory-card h5 {
+    font-size: 0.8em; /* Adjust font size for titles */
+  }
+
+  .inventory-card p {
+    font-size: 0.7em; /* Adjust font size for text */
+  }
+}
+
+.inventory-card-col {
+  padding: 0 !important;
+}
+
+.inventory-card .quantity-input {
+  width: 60px !important;
+  font-size: 1em;
+  padding: 2px 6px;
+  text-align: center;
+}
+
+.inventory-card .btn-save-qty {
+  padding: 4px 10px;
+  font-size: 1em;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.saved-msg {
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+  .inventory-card .quantity-input {
+    width: 40px !important;
+    font-size: 0.95em;
+  }
+  .inventory-card .btn-save-qty {
+    font-size: 0.95em;
+    padding: 2px 7px;
+    min-width: 28px;
+    min-height: 28px;
+  }
+  .saved-msg {
+    font-size: 0.85em;
+  }
+}
+
+@media (max-width: 480px) {
+  .inventory-card .quantity-input {
+    width: 32px !important;
+    font-size: 0.9em;
+  }
+  .inventory-card .btn-save-qty {
+    font-size: 0.9em;
+    padding: 1px 5px;
+    min-width: 22px;
+    min-height: 22px;
+  }
+  .saved-msg {
+    font-size: 0.8em;
+  }
+}
+
+/* Toast de carga oculto por defecto */
+#loadingToast {
+  position: fixed;
+  bottom: -100px; /* empieza fuera de la vista */
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  display: none;
+  animation: slideUp 0.5s forwards;
+  z-index: 9999;
+}
+
+/* Animación para deslizar hacia arriba */
+@keyframes slideUp {
+  from {
+    bottom: -100px;
+    opacity: 0;
+  }
+  to {
+    bottom: 50px;
+    opacity: 1;
+  }
+}
