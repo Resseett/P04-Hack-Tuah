@@ -34,5 +34,25 @@
       "id": "xy7-44",
       "quantity": 4
     }
+  ],
+  "jjd": [
+    {
+      "id": "x5-54",
+      "quantity": 1
+    },
+    {
+      "id": "xy5-54",
+      "quantity": 1
+    }
+  ],
+  "koga": [
+    {
+      "id": "bw2-44",
+      "quantity": 1
+    },
+    {
+      "id": "bw4-44",
+      "quantity": 1
+    }
   ]
 }

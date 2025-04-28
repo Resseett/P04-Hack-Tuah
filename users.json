@@ -38,5 +38,17 @@
   {
     "username": "jjd",
     "password": "$2a$10$lqRiOFTh.KZ/TDbNIDnLsempKDFF2Br5dEl5IL3rHsH./iw0YKlQy"
+  },
+  {
+    "username": "brock",
+    "password": "$2a$10$uA5igAVCMfKW5GG4vUqSwut/e6OO4WEHiIGtND9I5zcFeTQYfmAvS"
+  },
+  {
+    "username": "erika",
+    "password": "$2a$10$FMKiV2Ep36dr1TPBvwl1feVk3.XkcckZ0n3/IE9Hkvxp54LKj/eZ."
+  },
+  {
+    "username": "koga",
+    "password": "$2a$10$TEzYKjfFr/mHBE4Dh0E46uFHjW1T63uN6iP6uRwiTT4LJaPxzXh4K"
   }
 ]

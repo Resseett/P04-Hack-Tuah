@@ -93,14 +93,34 @@ document.getElementById("addCardBtn").addEventListener("click", async () => {
 
     const data = await res.json();
     if (data.success) {
-        alert("Carta añadida con éxito");
+        showToast("Carta añadida con éxito");
         document.getElementById("cardIdInput").value = "";
         renderInventory();
     } else {
-        alert("Error: " + data.message);
+        showToast("Error: " + data.message);
     }
 });
 
 document.addEventListener("DOMContentLoaded", () => {
     renderInventory();
 });
+
+function showToast(message, type) {
+    const toast = document.createElement("div");
+    toast.className = `toast align-items-center text-bg-${type === "success" ? "success" : "danger"} border-0 show`;
+    toast.style.position = "fixed";
+    toast.style.bottom = "20px";
+    toast.style.right = "20px";
+    toast.style.zIndex = "9999";
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    document.body.appendChild(toast);
+  
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+  }
