@@ -29,6 +29,16 @@
       ],
       "price": "No disponible",
       "quantity": 1
+    },
+    {
+      "id": "xy1-55",
+      "name": "Trevenant",
+      "image": "https://images.pokemontcg.io/xy1/55_hires.png",
+      "types": [
+        "Psychic"
+      ],
+      "price": "No disponible",
+      "quantity": 1
     }
   ],
   "asdf": [
@@ -70,6 +80,68 @@
     },
     {
       "id": "bw4-44",
+      "quantity": 1
+    }
+  ],
+  "jje": [
+    {
+      "id": "xy9-65",
+      "name": "Trevenant",
+      "image": "https://images.pokemontcg.io/xy9/65_hires.png",
+      "types": [
+        "Psychic"
+      ],
+      "price": 0.19,
+      "quantity": 1
+    },
+    {
+      "id": "bw6-63",
+      "name": "Baltoy",
+      "image": "https://images.pokemontcg.io/bw6/63_hires.png",
+      "types": [
+        "Fighting"
+      ],
+      "price": 0.22,
+      "quantity": 1
+    },
+    {
+      "id": "xy6-23",
+      "name": "Zapdos",
+      "image": "https://images.pokemontcg.io/xy6/23_hires.png",
+      "types": [
+        "Lightning"
+      ],
+      "price": 0.51,
+      "quantity": 2
+    },
+    {
+      "id": "xyp-XY14",
+      "name": "Trevenant",
+      "image": "https://images.pokemontcg.io/xyp/XY14_hires.png",
+      "types": [
+        "Psychic"
+      ],
+      "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "bw3-45",
+      "name": "Yamask",
+      "image": "https://images.pokemontcg.io/bw3/45_hires.png",
+      "types": [
+        "Psychic"
+      ],
+      "price": 0.34,
+      "quantity": 1
+    },
+    {
+      "id": "bw2-32",
+      "name": "Emolga",
+      "image": "https://images.pokemontcg.io/bw2/32_hires.png",
+      "types": [
+        "Lightning"
+      ],
+      "price": 0.54,
       "quantity": 1
     }
   ]

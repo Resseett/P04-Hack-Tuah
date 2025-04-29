@@ -16,7 +16,7 @@ async function renderInventory() {
     const container = document.getElementById("inventoryContainer");
     container.innerHTML = "Cargando...";
 
-    const cards = await fetchInventory(); // Ahora devuelve objetos con id y quantity
+    const cards = await fetchInventory();
     container.innerHTML = "";
 
     if (cards.length === 0) {
@@ -26,7 +26,7 @@ async function renderInventory() {
 
     for (const card of cards) {
         try {
-            const cardDetails = await fetchCardDetails(card.id); // card.id en lugar de id
+            const cardDetails = await fetchCardDetails(card.id);
             const cardHTML = `
                 <div class="col inventory-card-col">
                     <div class="card h-100 inventory-card">
@@ -39,6 +39,7 @@ async function renderInventory() {
                                 <label for="quantity-${cardDetails.id}" class="me-1 mb-0">Cantidad:</label>
                                 <input type="number" id="quantity-${cardDetails.id}" class="form-control form-control-sm quantity-input" style="width: 60px;" value="${card.quantity}" min="1">
                                 <button class="btn btn-primary btn-save-qty" id="saveBtn-${cardDetails.id}" onclick="saveQuantity('${cardDetails.id}')">Guardar</button>
+                                <span id="savedMsg-${cardDetails.id}" class="saved-msg" style="display:none;color:green;font-size:0.9em;">✔</span>
                             </div>
                         </div>
                     </div>
@@ -49,6 +50,18 @@ async function renderInventory() {
             console.error("Error al cargar carta:", card.id, err);
         }
     }
+
+    // Permitir guardar con Enter y feedback visual
+    cards.forEach(card => {
+        const input = document.getElementById(`quantity-${card.id}`);
+        if (input) {
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    saveQuantity(card.id);
+                }
+            });
+        }
+    });
 }
 
 async function saveQuantity(cardId) {
@@ -56,27 +69,33 @@ async function saveQuantity(cardId) {
     const quantity = parseInt(quantityInput.value, 10);
 
     if (isNaN(quantity) || quantity < 1) {
-        alert("Por favor, ingresa una cantidad válida.");
+        quantityInput.classList.add("is-invalid");
+        setTimeout(() => quantityInput.classList.remove("is-invalid"), 1200);
         return;
     }
 
     try {
         const res = await fetch("/api/inventory/update", {
             method: "POST",
-            credentials: "include", // 🔥 Incluir credenciales
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ cardId, quantity }),
         });
 
         const data = await res.json();
+        const savedMsg = document.getElementById(`savedMsg-${cardId}`);
         if (data.success) {
-            alert("Cantidad guardada con éxito.");
+            if (savedMsg) {
+                savedMsg.style.display = "inline";
+                setTimeout(() => savedMsg.style.display = "none", 1200);
+            }
         } else {
-            alert("Error al guardar la cantidad: " + data.message);
+            quantityInput.classList.add("is-invalid");
+            setTimeout(() => quantityInput.classList.remove("is-invalid"), 1200);
         }
     } catch (err) {
-        console.error("Error al guardar la cantidad:", err);
-        alert("Hubo un error al guardar la cantidad.");
+        quantityInput.classList.add("is-invalid");
+        setTimeout(() => quantityInput.classList.remove("is-invalid"), 1200);
     }
 }
 
@@ -100,62 +119,6 @@ document.getElementById("addCardBtn").addEventListener("click", async () => {
         showToast("Error: " + data.message);
     }
 });
-
-document.addEventListener('DOMContentLoaded', () => {
-    renderInventory();
-  });
-  
-  async function renderInventory() {
-    const inventoryContainer = document.getElementById('inventoryContainer');
-    inventoryContainer.innerHTML = ""; // Limpiar antes de cargar
-  
-    try {
-      const res = await fetch("/api/inventory/list", {
-        method: "GET",
-        credentials: "include" // importante para enviar cookies
-      });
-  
-      const data = await res.json();
-  
-      if (!data.success || !Array.isArray(data.inventory)) {
-        inventoryContainer.innerHTML = "<p>⚠️ Error al cargar el inventario.</p>";
-        return;
-      }
-  
-      if (data.inventory.length === 0) {
-        inventoryContainer.innerHTML = "<p>📭 No tienes cartas en tu inventario aún.</p>";
-        return;
-      }
-  
-      // Mostrar las cartas correctamente
-      data.inventory.forEach(carta => {
-        const cartaDiv = document.createElement('div');
-        cartaDiv.className = 'col';
-  
-        cartaDiv.innerHTML = `
-          <div class="card h-100">
-            <img src="${carta.image}" class="card-img-top" alt="${carta.name}">
-            <div class="card-body">
-              <h5 class="card-title">${carta.name}</h5>
-              <p class="card-text"><strong>Tipo:</strong> ${carta.types?.join(", ") || "Desconocido"}</p>
-              <p class="card-text"><strong>Precio:</strong> ${
-                carta.price !== "No disponible"
-                  ? `$${parseFloat(carta.price).toFixed(2)}`
-                  : "No disponible"
-              }</p>
-              <p class="card-text"><strong>Cantidad:</strong> ${carta.quantity}</p>
-            </div>
-          </div>
-        `;
-  
-        inventoryContainer.appendChild(cartaDiv);
-      });
-  
-    } catch (error) {
-      console.error("Error al cargar inventario:", error);
-      inventoryContainer.innerHTML = "<p>⚠️ Error al conectar con el servidor.</p>";
-    }
-  }
 
 function showToast(message, type) {
     const toast = document.createElement("div");
