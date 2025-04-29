@@ -101,9 +101,61 @@ document.getElementById("addCardBtn").addEventListener("click", async () => {
     }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
     renderInventory();
-});
+  });
+  
+  async function renderInventory() {
+    const inventoryContainer = document.getElementById('inventoryContainer');
+    inventoryContainer.innerHTML = ""; // Limpiar antes de cargar
+  
+    try {
+      const res = await fetch("/api/inventory/list", {
+        method: "GET",
+        credentials: "include" // importante para enviar cookies
+      });
+  
+      const data = await res.json();
+  
+      if (!data.success || !Array.isArray(data.inventory)) {
+        inventoryContainer.innerHTML = "<p>⚠️ Error al cargar el inventario.</p>";
+        return;
+      }
+  
+      if (data.inventory.length === 0) {
+        inventoryContainer.innerHTML = "<p>📭 No tienes cartas en tu inventario aún.</p>";
+        return;
+      }
+  
+      // Mostrar las cartas correctamente
+      data.inventory.forEach(carta => {
+        const cartaDiv = document.createElement('div');
+        cartaDiv.className = 'col';
+  
+        cartaDiv.innerHTML = `
+          <div class="card h-100">
+            <img src="${carta.image}" class="card-img-top" alt="${carta.name}">
+            <div class="card-body">
+              <h5 class="card-title">${carta.name}</h5>
+              <p class="card-text"><strong>Tipo:</strong> ${carta.types?.join(", ") || "Desconocido"}</p>
+              <p class="card-text"><strong>Precio:</strong> ${
+                carta.price !== "No disponible"
+                  ? `$${parseFloat(carta.price).toFixed(2)}`
+                  : "No disponible"
+              }</p>
+              <p class="card-text"><strong>Cantidad:</strong> ${carta.quantity}</p>
+            </div>
+          </div>
+        `;
+  
+        inventoryContainer.appendChild(cartaDiv);
+      });
+  
+    } catch (error) {
+      console.error("Error al cargar inventario:", error);
+      inventoryContainer.innerHTML = "<p>⚠️ Error al conectar con el servidor.</p>";
+    }
+  }
 
 function showToast(message, type) {
     const toast = document.createElement("div");

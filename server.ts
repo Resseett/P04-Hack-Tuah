@@ -255,6 +255,24 @@ router.get("/api/inventory", async (ctx) => {
   ctx.response.body = { success: true, cards: userInventory };
 });
 
+router.get("/api/inventory/list", async (ctx) => {
+  const cookies = getCookies(ctx.request.headers);
+  const username = cookies.loggedInUser;
+
+  if (!username) {
+    ctx.response.status = 401;
+    ctx.response.body = { success: false, message: "No autenticado." };
+    return;
+  }
+
+  const userInventory = inventories[username] || [];
+
+  ctx.response.body = {
+    success: true,
+    inventory: userInventory,
+  };
+});
+
 // Ruta para agregar carta al inventario
 router.post("/api/inventory/add", async (ctx) => {
   const cookies = getCookies(ctx.request.headers);
@@ -277,28 +295,46 @@ router.post("/api/inventory/add", async (ctx) => {
 
   if (!inventories[username]) inventories[username] = [];
 
-  // Verificar si la carta ya existe en el inventario
-  const existingCard = inventories[username].find(
-    (card) => typeof card !== "string" && card.id === cardId
-  );
+  // 🔥 Consultar la API de Pokémon TCG para obtener datos reales
+  try {
+    const response = await fetch(`https://api.pokemontcg.io/v2/cards/${cardId}`);
+    const data = await response.json();
+    const cardData = data.data;
 
-  if (existingCard) {
-    // Si ya existe, incrementar la cantidad
-    existingCard.quantity += 1;
-  } else {
-    // Si no existe, agregarla con quantity: 1
-    inventories[username].push({ id: cardId, quantity: 1 });
+    if (!cardData) {
+      ctx.response.status = 404;
+      ctx.response.body = { success: false, message: "Carta no encontrada en la API." };
+      return;
+    }
+
+    // Verificar si ya existe la carta
+    const existingCard = inventories[username].find((card) => card.id === cardId);
+
+    if (existingCard) {
+      // Si ya existe, aumentar la cantidad
+      existingCard.quantity += 1;
+    } else {
+      // Agregar la carta nueva con datos reales
+      inventories[username].push({
+        id: cardData.id,
+        name: cardData.name,
+        image: cardData.images?.large || cardData.images?.small || "",
+        types: cardData.types || ["Desconocido"],
+        price: cardData.tcgplayer?.prices?.normal?.market || "No disponible",
+        quantity: 1,
+      });
+    }
+
+    // Guardar cambios en inventories.json
+    await saveInventories();
+
+    ctx.response.body = { success: true, message: "Carta añadida al inventario." };
+
+  } catch (error) {
+    console.error("Error al consultar la API de Pokémon:", error);
+    ctx.response.status = 500;
+    ctx.response.body = { success: false, message: "Error al consultar la API." };
   }
-
-  // Filtrar y eliminar cualquier entrada que sea un string (formato incorrecto)
-  inventories[username] = inventories[username].filter(
-    (card) => typeof card === "object" && card.id
-  );
-
-  // Guardar los cambios en el archivo
-  await saveInventories();
-
-  ctx.response.body = { success: true, message: "Carta añadida al inventario." };
 });
 
 

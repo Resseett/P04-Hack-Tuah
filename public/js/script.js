@@ -25,6 +25,9 @@ async function buscarCarta() {
           <img src="${carta.images.large}" alt="${carta.name}" />
           <p><strong>Tipo:</strong> ${carta.types?.join(", ") || "Desconocido"}</p>
           <p><strong>Precio:</strong> ${precio}</p>
+          <button id="add-${carta.id}" class="btn btn-success mt-2" onclick="agregarAlInventario('${carta.id}')">
+            ➕ Agregar al Inventario
+          </button>
         `;
 
         div.appendChild(cartaDiv);
@@ -36,4 +39,51 @@ async function buscarCarta() {
     console.error("Error al buscar carta:", error);
     div.innerHTML = "<p>⚠️ Hubo un error al cargar las cartas.</p>";
   }
+}
+async function agregarAlInventario(cardId) {
+  try {
+    const res = await fetch("/api/inventory/add", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cardId })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      const boton = document.getElementById(`add-${cardId}`);
+      if (boton) {
+        boton.textContent = "Agregado ✅";
+        boton.classList.remove('btn-success');
+        boton.classList.add('btn-secondary');
+        boton.disabled = true;
+      }
+      showToast("✅ Carta agregada al inventario.");
+    } else {
+      showToast("❌ Error al agregar: " + data.message);
+    }
+  } catch (error) {
+    console.error("Error al agregar carta:", error);
+    showToast("⚠️ Error de conexión.");
+  }
+}
+function mostrarToast(mensaje, success = true) {
+  const toastRoot = document.getElementById("toast-root");
+  if (!toastRoot) return;
+
+  const toast = document.createElement("div");
+  toast.className = `toast align-items-center text-white ${success ? 'bg-success' : 'bg-danger'} border-0 m-2`;
+  toast.role = "alert";
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">${mensaje}</div>
+    </div>
+  `;
+
+  toastRoot.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
 }

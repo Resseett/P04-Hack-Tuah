@@ -1,15 +1,33 @@
 {
   "ash": [
     {
+      "id": "sv7-170",
+      "name": "Terapagos ex",
+      "image": "https://images.pokemontcg.io/sv7/170_hires.png",
+      "types": [
+        "Colorless"
+      ],
+      "price": "No disponible",
+      "quantity": 1
+    },
+    {
       "id": "xy7-54",
+      "name": "Gardevoir",
+      "image": "https://images.pokemontcg.io/xy7/54_hires.png",
+      "types": [
+        "Fairy"
+      ],
+      "price": "No disponible",
       "quantity": 1
     },
     {
-      "id": "xy6-22",
-      "quantity": 1
-    },
-    {
-      "id": "xy5-23",
+      "id": "ex13-11",
+      "name": "Latias δ",
+      "image": "https://images.pokemontcg.io/ex13/11_hires.png",
+      "types": [
+        "Fire"
+      ],
+      "price": "No disponible",
       "quantity": 1
     }
   ],
