@@ -12,7 +12,15 @@
     <h1>Pokedex</h1>
     <p>Aquí puedes explorar todas las cartas de Pokémon disponibles.</p>
     <p id="welcomeText">¿Qué carta buscas hoy día?</p>
-  
+
+    <!-- Filtros de búsqueda -->
+    <div id="filtros" style="margin-bottom: 20px;">
+      <label for="setSelect"><strong>Filtrar por set:</strong></label>
+      <select id="setSelect">
+        <option value="">Todos los sets</option>
+      </select>
+    </div>
+
     <input type="text" id="cardId" placeholder="Ingresa el nombre de la carta" />
     <button onclick="buscarCarta()">Buscar Carta</button>
     <div id="resultado"></div>
@@ -51,6 +59,26 @@
         });
       } else {
         resultsDiv.innerHTML = "<p>❌ No se encontraron resultados.</p>";
+      }
+    });
+
+    // Llenar el select de sets al cargar la página
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Obtener sets de la API y llenar el select
+      const setSelect = document.getElementById('setSelect');
+      try {
+        const res = await fetch('https://api.pokemontcg.io/v2/sets');
+        const data = await res.json();
+        if (data?.data?.length > 0) {
+          data.data.forEach(set => {
+            const option = document.createElement('option');
+            option.value = set.id;
+            option.textContent = `${set.name} (${set.id})`;
+            setSelect.appendChild(option);
+          });
+        }
+      } catch (err) {
+        // Si falla, deja solo la opción por defecto
       }
     });
   </script>  

@@ -1,12 +1,19 @@
 async function buscarCarta() {
   const cardName = document.getElementById("cardId").value.trim();
-  if (!cardName) return;
+  const setId = document.getElementById("setSelect")?.value || "";
+  if (!cardName && !setId) return;
 
   const div = document.getElementById("resultado");
   div.innerHTML = "<p>🔎 Buscando cartas...</p>";
 
   try {
-    const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=name:${cardName}`);
+    // Construir query para la API
+    let query = [];
+    if (cardName) query.push(`name:${cardName}`);
+    if (setId) query.push(`set.id:${setId}`);
+    const q = query.join(" ");
+
+    const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}`);
     const data = await res.json();
 
     if (data?.data?.length > 0) {
