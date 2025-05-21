@@ -144,5 +144,27 @@
       "price": 0.54,
       "quantity": 1
     }
+  ],
+  "mmdw": [
+    {
+      "id": "mcd19-12",
+      "name": "Eevee",
+      "image": "https://images.pokemontcg.io/mcd19/12_hires.png",
+      "types": [
+        "Colorless"
+      ],
+      "price": "No disponible",
+      "quantity": 2
+    },
+    {
+      "id": "base6-3",
+      "name": "Charizard",
+      "image": "https://images.pokemontcg.io/base6/3_hires.png",
+      "types": [
+        "Fire"
+      ],
+      "price": "No disponible",
+      "quantity": 1
+    }
   ]
 }

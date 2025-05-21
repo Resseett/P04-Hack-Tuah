@@ -25,30 +25,38 @@ async function renderInventory() {
     }
 
     for (const card of cards) {
+        let cardDetails = null;
         try {
-            const cardDetails = await fetchCardDetails(card.id);
-            const cardHTML = `
-                <div class="col inventory-card-col">
-                    <div class="card h-100 inventory-card">
-                        <img src="${cardDetails.images.small}" class="card-img-top" alt="${cardDetails.name}">
-                        <div class="card-body">
-                            <h5 class="card-title">${cardDetails.name}</h5>
-                            <p class="card-text">ID: ${cardDetails.id}</p>
-                            <p class="card-text">Tipo: ${cardDetails.supertype}</p>
-                            <div class="d-flex align-items-center flex-wrap gap-2 justify-content-center">
-                                <label for="quantity-${cardDetails.id}" class="me-1 mb-0">Cantidad:</label>
-                                <input type="number" id="quantity-${cardDetails.id}" class="form-control form-control-sm quantity-input" style="width: 60px;" value="${card.quantity}" min="1">
-                                <button class="btn btn-primary btn-save-qty" id="saveBtn-${cardDetails.id}" onclick="saveQuantity('${cardDetails.id}')">Guardar</button>
-                                <span id="savedMsg-${cardDetails.id}" class="saved-msg" style="display:none;color:green;font-size:0.9em;">✔</span>
-                            </div>
+            cardDetails = await fetchCardDetails(card.id);
+        } catch (err) {
+            cardDetails = null;
+        }
+
+        // Si la API externa falla, usar los datos locales
+        const name = cardDetails?.name || card.name || card.id;
+        const image = cardDetails?.images?.small || card.image || "";
+        const supertype = cardDetails?.supertype || (card.types ? card.types.join(", ") : "Desconocido");
+        const quantity = card.quantity || 1;
+
+        const cardHTML = `
+            <div class="col inventory-card-col">
+                <div class="card h-100 inventory-card">
+                    <img src="${image}" class="card-img-top" alt="${name}">
+                    <div class="card-body">
+                        <h5 class="card-title">${name}</h5>
+                        <p class="card-text">ID: ${card.id}</p>
+                        <p class="card-text">Tipo: ${supertype}</p>
+                        <div class="d-flex align-items-center flex-wrap gap-2 justify-content-center">
+                            <label for="quantity-${card.id}" class="me-1 mb-0">Cantidad:</label>
+                            <input type="number" id="quantity-${card.id}" class="form-control form-control-sm quantity-input" style="width: 60px;" value="${quantity}" min="1">
+                            <button class="btn btn-primary btn-save-qty" id="saveBtn-${card.id}" onclick="saveQuantity('${card.id}')">Guardar</button>
+                            <span id="savedMsg-${card.id}" class="saved-msg" style="display:none;color:green;font-size:0.9em;">✔</span>
                         </div>
                     </div>
                 </div>
-            `;
-            container.innerHTML += cardHTML;
-        } catch (err) {
-            console.error("Error al cargar carta:", card.id, err);
-        }
+            </div>
+        `;
+        container.innerHTML += cardHTML;
     }
 
     // Permitir guardar con Enter y feedback visual
@@ -139,3 +147,7 @@ function showToast(message, type) {
         toast.remove();
     }, 3000);
   }
+
+document.addEventListener("DOMContentLoaded", () => {
+    renderInventory();
+});

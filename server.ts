@@ -251,7 +251,15 @@ router.get("/api/inventory", async (ctx) => {
     return;
   }
 
-  const userInventory = inventories[username] || [];
+  // Normalizar inventario: asegurar que cada carta tenga al menos id y quantity
+  const userInventory = (inventories[username] || []).map((card: any) => {
+    if (typeof card === "string") {
+      return { id: card, quantity: 1 };
+    }
+    // Si no tiene quantity, poner 1 por defecto
+    return { ...card, quantity: card.quantity ?? 1 };
+  });
+
   ctx.response.body = { success: true, cards: userInventory };
 });
 
