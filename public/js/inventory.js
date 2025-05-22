@@ -1,5 +1,5 @@
 async function fetchInventory() {
-    const res = await fetch("/api/inventory", { credentials: "include" }); // 🔥 Incluir credenciales
+    const res = await fetch("/api/inventory", { credentials: "include" }); 
     const data = await res.json();
     if (data.success) return data.cards;
     return [];
@@ -33,9 +33,12 @@ async function renderInventory() {
         }
 
         // Si la API externa falla, usar los datos locales
-        const name = cardDetails?.name || card.name || card.id;
-        const image = cardDetails?.images?.small || card.image || "";
-        const supertype = cardDetails?.supertype || (card.types ? card.types.join(", ") : "Desconocido");
+        const name     = cardDetails?.name    || card.name;
+        const image    = cardDetails?.images?.small || card.image;
+        const setName  = cardDetails?.set?.name || 'Desconocido';        
+        const setId    = cardDetails?.set?.id   || '';
+        const types    = cardDetails?.types?.join(', ') || 'Desconocido'; 
+        const rarity   = cardDetails?.rarity     || 'Desconocida';       
         const quantity = card.quantity || 1;
 
         const cardHTML = `
@@ -45,18 +48,26 @@ async function renderInventory() {
                     <div class="card-body">
                         <h5 class="card-title">${name}</h5>
                         <p class="card-text">ID: ${card.id}</p>
-                        <p class="card-text">Tipo: ${supertype}</p>
-                        <div class="d-flex align-items-center flex-wrap gap-2 justify-content-center">
-                            <label for="quantity-${card.id}" class="me-1 mb-0">Cantidad:</label>
-                            <input type="number" id="quantity-${card.id}" class="form-control form-control-sm quantity-input" style="width: 60px;" value="${quantity}" min="1">
-                            <button class="btn btn-primary btn-save-qty" id="saveBtn-${card.id}" onclick="saveQuantity('${card.id}')">Guardar</button>
-                            <span id="savedMsg-${card.id}" class="saved-msg" style="display:none;color:green;font-size:0.9em;">✔</span>
+                        <p class="card-text"><strong>Set:</strong> ${setName} (${setId})</p>           
+                        <p class="card-text"><strong>Tipo:</strong> ${types}</p>                
+                        <p class="card-text"><strong>Rareza:</strong> ${rarity}</p>            
+                        <div class="d-flex align-items-center …">
+                            <input type="number" id="quantity-${card.id}" class="form-control me-2" value="${quantity}" min="1">
+                            <button class="btn btn-primary" onclick="saveQuantity(${card.id})">Guardar</button>
+                            <span id="savedMsg-${card.id}" class="text-success ms-2" style="display: none;">Guardado</span>
+                            <button id="detailBtn-${card.id}" class="btn btn-primary ms-2">
+                                Ver Detalles
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         `;
-        container.innerHTML += cardHTML;
+        container.insertAdjacentHTML('beforeend', cardHTML);
+        document.getElementById(`detailBtn-${card.id}`).addEventListener('click', () => showCardDetails(cardDetails || card)
+        );        
+        
+
     }
 
     // Permitir guardar con Enter y feedback visual
@@ -69,8 +80,41 @@ async function renderInventory() {
                 }
             });
         }
+        
     });
 }
+
+function showCardDetails(info) {
+  // 1) Construir el contenido
+  const body = document.getElementById('detalleCartaBody');
+  body.innerHTML = `
+    <div class="row">
+      <div class="col-md-4">
+        <img
+          src="${info.images?.large || info.image}"
+          alt="${info.name}"
+          class="img-fluid"
+        >
+      </div>
+      <div class="col-md-8">
+        <h5>${info.name}</h5>
+        <p><strong>Set:</strong> ${info.set?.name || '—'} (${info.set?.id || '—'})</p>
+        <p><strong>Tipo:</strong> ${info.types?.join(', ') || '—'}</p>
+        <p><strong>Rareza:</strong> ${info.rarity || '—'}</p>
+      </div>
+    </div>
+  `;
+
+  // 2) Abrir el modal con Bootstrap
+  new bootstrap.Modal(
+    document.getElementById('detalleCartaModal')
+  ).show();
+}
+
+
+document.addEventListener("DOMContentLoaded", renderInventory);
+
+
 
 async function saveQuantity(cardId) {
     const quantityInput = document.getElementById(`quantity-${cardId}`);
