@@ -345,6 +345,44 @@ router.post("/api/inventory/add", async (ctx) => {
   }
 });
 
+// Ruta para eliminar carta del inventario
+router.post("/api/inventory/remove", async (ctx) => {
+  const cookies = getCookies(ctx.request.headers);
+  const username = cookies.loggedInUser;
+
+  if (!username) {
+    ctx.response.status = 401;
+    ctx.response.body = { success: false, message: "No autenticado." };
+    return;
+  }
+
+  const body = ctx.request.body({ type: "json" });
+  const { cardId } = await body.value;
+
+  if (!cardId) {
+    ctx.response.status = 400;
+    ctx.response.body = { success: false, message: "ID de carta requerido." };
+    return;
+  }
+
+  if (!inventories[username]) inventories[username] = [];
+
+  // Eliminar la carta del inventario
+  const prevLength = inventories[username].length;
+  inventories[username] = inventories[username].filter((card: any) => card.id !== cardId);
+
+  if (inventories[username].length === prevLength) {
+    ctx.response.status = 404;
+    ctx.response.body = { success: false, message: "Carta no encontrada en el inventario." };
+    return;
+  }
+
+  // Guardar el inventario actualizado en el archivo JSON
+  await saveInventories();
+
+  ctx.response.body = { success: true, message: "Carta eliminada del inventario." };
+});
+
 
 app.use(router.routes());
 app.use(router.allowedMethods());

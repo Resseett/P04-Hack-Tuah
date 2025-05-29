@@ -52,11 +52,14 @@ async function renderInventory() {
                         <p class="card-text"><strong>Tipo:</strong> ${types}</p>                
                         <p class="card-text"><strong>Rareza:</strong> ${rarity}</p>            
                         <div class="d-flex align-items-center …">
-                            <input type="number" id="quantity-${card.id}" class="form-control me-2" value="${quantity}" min="1">
+                            <input type="number" id="quantity-${card.id}" class="form-control me-2 quantity-input" value="${quantity}" min="1">
                             <button class="btn btn-primary" onclick="saveQuantity(${card.id})">Guardar</button>
                             <span id="savedMsg-${card.id}" class="text-success ms-2" style="display: none;">Guardado</span>
                             <button id="detailBtn-${card.id}" class="btn btn-primary ms-2">
                                 Ver Detalles
+                            </button>
+                            <button id="removeBtn-${card.id}" class="btn btn-danger ms-2" title="Eliminar carta">
+                                Eliminar
                             </button>
                         </div>
                     </div>
@@ -64,8 +67,8 @@ async function renderInventory() {
             </div>
         `;
         container.insertAdjacentHTML('beforeend', cardHTML);
-        document.getElementById(`detailBtn-${card.id}`).addEventListener('click', () => showCardDetails(cardDetails || card)
-        );        
+        document.getElementById(`detailBtn-${card.id}`).addEventListener('click', () => showCardDetails(cardDetails || card));
+        document.getElementById(`removeBtn-${card.id}`).addEventListener('click', () => removeCard(card.id));
         
 
     }
@@ -112,7 +115,9 @@ function showCardDetails(info) {
 }
 
 
-document.addEventListener("DOMContentLoaded", renderInventory);
+document.addEventListener("DOMContentLoaded", () => {
+    renderInventory();
+});
 
 
 
@@ -172,6 +177,27 @@ document.getElementById("addCardBtn").addEventListener("click", async () => {
     }
 });
 
+async function removeCard(cardId) {
+    if (!confirm("¿Seguro que quieres eliminar esta carta del inventario?")) return;
+    try {
+        const res = await fetch("/api/inventory/remove", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cardId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast("Carta eliminada del inventario", "success");
+            renderInventory();
+        } else {
+            showToast("Error: " + data.message, "error");
+        }
+    } catch (err) {
+        showToast("Error de conexión", "error");
+    }
+}
+
 function showToast(message, type) {
     const toast = document.createElement("div");
     toast.className = `toast align-items-center text-bg-${type === "success" ? "success" : "danger"} border-0 show`;
@@ -191,7 +217,3 @@ function showToast(message, type) {
         toast.remove();
     }, 3000);
   }
-
-document.addEventListener("DOMContentLoaded", () => {
-    renderInventory();
-});
