@@ -9,6 +9,18 @@ import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
 const users = JSON.parse(await Deno.readTextFile("users.json"));
 console.log("Usuarios cargados:", users);
 
+
+let tradeWishes = {};
+try {
+  tradeWishes = JSON.parse(await Deno.readTextFile("trade_wishlist.json"));
+} catch {
+  tradeWishes = {};
+}
+
+async function saveTradeWishes() {
+  await Deno.writeTextFile("trade_wishlist.json", JSON.stringify(tradeWishes, null, 2));
+}
+
 const app = new Application();
 const router = new Router();
 
@@ -43,6 +55,10 @@ router.get("/scan", async (ctx) => {
 
 router.get("/inventory", async (ctx) => {
     await send(ctx, "public/inventory.html", { root: Deno.cwd() });
+});
+
+router.get("/trade", async (ctx) => {
+  await send(ctx, "public/trade.html", { root: Deno.cwd() });
 });
 
 // Ruta para registrar un nuevo usuario
@@ -381,6 +397,124 @@ router.post("/api/inventory/remove", async (ctx) => {
   await saveInventories();
 
   ctx.response.body = { success: true, message: "Carta eliminada del inventario." };
+});
+
+
+// Agregar carta deseada
+router.post("/api/trade/add", async (ctx) => {
+  const cookies = getCookies(ctx.request.headers);
+  const username = cookies.loggedInUser;
+
+  if (!username) {
+    ctx.response.status = 401;
+    ctx.response.body = { success: false, message: "No autenticado" };
+    return;
+  }
+
+  const { cardId } = await ctx.request.body({ type: "json" }).value;
+  if (!cardId) {
+    ctx.response.status = 400;
+    ctx.response.body = { success: false, message: "ID de carta requerido" };
+    return;
+  }
+
+  if (!tradeWishes[username]) tradeWishes[username] = [];
+
+  if (!tradeWishes[username].includes(cardId)) {
+    tradeWishes[username].push(cardId);
+    await saveTradeWishes();
+  }
+
+  ctx.response.body = { success: true, message: "Carta añadida a la lista de intercambio" };
+});
+
+// Obtener cartas deseadas
+router.get("/api/trade/list", async (ctx) => {
+  const cookies = getCookies(ctx.request.headers);
+  const username = cookies.loggedInUser;
+
+  if (!username) {
+    ctx.response.status = 401;
+    ctx.response.body = { success: false, message: "No autenticado" };
+    return;
+  }
+
+  const wishes = tradeWishes[username] || [];
+  ctx.response.body = { success: true, cards: wishes };
+});
+
+
+
+
+router.post("/api/inventory/toggle-trade", async (ctx) => {
+  const cookies = getCookies(ctx.request.headers);
+  const username = cookies.loggedInUser;
+
+  if (!username) {
+    ctx.response.status = 401;
+    ctx.response.body = { success: false, message: "No autenticado" };
+    return;
+  }
+
+  const { cardId } = await ctx.request.body({ type: "json" }).value;
+  if (!cardId) {
+    ctx.response.status = 400;
+    ctx.response.body = { success: false, message: "ID de carta requerido" };
+    return;
+  }
+
+  const userInventory = inventories[username] || [];
+
+  const card = userInventory.find((c: any) => c.id === cardId);
+  if (!card) {
+    ctx.response.status = 404;
+    ctx.response.body = { success: false, message: "Carta no encontrada" };
+    return;
+  }
+
+  card.trade = !card.trade; // Toggle estado
+
+  await saveInventories();
+  ctx.response.body = { success: true, trade: card.trade };
+});
+
+
+router.post("/api/inventory/tradable", async (ctx) => {
+  const cookies = getCookies(ctx.request.headers);
+  const username = cookies.loggedInUser;
+
+  if (!username) {
+    ctx.response.status = 401;
+    ctx.response.body = { success: false, message: "No autenticado." };
+    return;
+  }
+
+  const { cardId, tradable } = await ctx.request.body({ type: "json" }).value;
+
+  if (!cardId || typeof tradable !== "boolean") {
+    ctx.response.status = 400;
+    ctx.response.body = { success: false, message: "Datos inválidos." };
+    return;
+  }
+
+  const userInventory = inventories[username];
+  if (!userInventory) {
+    ctx.response.status = 404;
+    ctx.response.body = { success: false, message: "Inventario no encontrado." };
+    return;
+  }
+
+  const card = userInventory.find((c) => c.id === cardId);
+  if (!card) {
+    ctx.response.status = 404;
+    ctx.response.body = { success: false, message: "Carta no encontrada." };
+    return;
+  }
+
+  card.isTradable = tradable;
+  await saveInventories();
+
+  ctx.response.body = { success: true };
 });
 
 

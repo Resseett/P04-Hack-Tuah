@@ -189,16 +189,6 @@
   ],
   "cris": [
     {
-      "id": "xy7-54",
-      "name": "Gardevoir",
-      "image": "https://images.pokemontcg.io/xy7/54_hires.png",
-      "types": [
-        "Fairy"
-      ],
-      "price": "No disponible",
-      "quantity": 1
-    },
-    {
       "id": "xy7-55",
       "name": "Cottonee",
       "image": "https://images.pokemontcg.io/xy7/55_hires.png",
@@ -206,7 +196,9 @@
         "Fairy"
       ],
       "price": 0.16,
-      "quantity": 1
+      "quantity": 1,
+      "trade": false,
+      "isTradable": true
     }
   ]
 }

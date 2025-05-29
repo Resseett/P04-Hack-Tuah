@@ -61,6 +61,9 @@ async function renderInventory() {
                             <button id="removeBtn-${card.id}" class="btn btn-danger ms-2" title="Eliminar carta">
                                 Eliminar
                             </button>
+                            <button class="btn btn-warning ms-2" onclick="toggleTradable('${card.id}', ${card.isTradable ?? false})">
+                                ${card.isTradable ? "Quitar de intercambio" : "Marcar como intercambiable"}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -217,6 +220,24 @@ function showToast(message, type) {
         toast.remove();
     }, 3000);
   }
+
+
+async function toggleTradable(cardId, currentValue) {
+  const res = await fetch("/api/inventory/tradable", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ cardId, tradable: !currentValue })
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    showToast("Estado de intercambio actualizado", "success");
+    renderInventory(); // Vuelve a renderizar para reflejar el nuevo estado
+  } else {
+    showToast("Error al actualizar: " + data.message, "danger");
+  }
+}
 
 document.getElementById("statsBtn").addEventListener("click", async () => {
   const cards = await fetchInventory();
