@@ -18,7 +18,7 @@
         "Fairy"
       ],
       "price": "No disponible",
-      "quantity": 1
+      "quantity": 2
     },
     {
       "id": "ex13-11",
@@ -38,6 +38,26 @@
         "Psychic"
       ],
       "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "bw3-45",
+      "name": "Yamask",
+      "image": "https://images.pokemontcg.io/bw3/45_hires.png",
+      "types": [
+        "Psychic"
+      ],
+      "price": 0.31,
+      "quantity": 1
+    },
+    {
+      "id": "bw1-56",
+      "name": "Duosion",
+      "image": "https://images.pokemontcg.io/bw1/56_hires.png",
+      "types": [
+        "Psychic"
+      ],
+      "price": 0.79,
       "quantity": 1
     }
   ],

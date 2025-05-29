@@ -217,3 +217,64 @@ function showToast(message, type) {
         toast.remove();
     }, 3000);
   }
+
+document.getElementById("statsBtn").addEventListener("click", async () => {
+  const cards = await fetchInventory();
+  const typeCounts = {};
+  const setCounts = {};
+  let totalCards = 0;
+
+  for (const card of cards) {
+    let details = null;
+    try {
+      details = await fetchCardDetails(card.id);
+    } catch (e) {
+      details = card; // fallback
+    }
+
+    const types = details.types || [details.supertype || "Desconocido"];
+    types.forEach(type => {
+      typeCounts[type] = (typeCounts[type] || 0) + (card.quantity || 1);
+    });
+
+    const set = details.set?.name || "Desconocido";
+    setCounts[set] = (setCounts[set] || 0) + (card.quantity || 1);
+
+    totalCards += card.quantity || 1;
+  }
+
+  // Renderizar tipos
+  const typesContainer = document.getElementById("typesStats");
+  typesContainer.innerHTML = "";
+
+  const typeIcons = {
+    "Water": "💧", "Fire": "🔥", "Grass": "🍃", "Electric": "⚡", "Psychic": "🔮",
+    "Fighting": "🥊", "Darkness": "🌑", "Metal": "⚙️", "Fairy": "✨", "Dragon": "🐉",
+    "Colorless": "⚪", "Lightning": "⚡", "Ice": "❄️", "Trainer": "🎓", "Supporter": "🧑‍🤝‍🧑", 
+    "Item": "🎒", "Stadium": "🏟️", "Desconocido": "❓"
+  };
+
+  for (const [type, count] of Object.entries(typeCounts)) {
+    const percentage = ((count / totalCards) * 100).toFixed(1);
+    const icon = typeIcons[type] || "❓";
+    typesContainer.innerHTML += `
+      <p>${icon} <strong>${type}:</strong> ${percentage}%</p>
+      <div class="progress mb-3">
+        <div class="progress-bar bg-info" role="progressbar" style="width: ${percentage}%;" aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+    `;
+  }
+
+  // Renderizar sets
+  const setsContainer = document.getElementById("setsStats");
+  setsContainer.innerHTML = "";
+
+  for (const [setName, count] of Object.entries(setCounts)) {
+    setsContainer.innerHTML += `
+      <p><strong>${setName}:</strong> ${count} carta(s)</p>
+    `;
+  }
+
+  // Mostrar modal
+  new bootstrap.Modal(document.getElementById('statsModal')).show();
+});
