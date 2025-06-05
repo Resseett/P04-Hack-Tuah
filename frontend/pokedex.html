@@ -19,6 +19,25 @@
       <select id="setSelect">
         <option value="">Todos los sets</option>
       </select>
+      <label for="supertypeSelect"><strong>Tipo de carta:</strong></label>
+    <select id="supertypeSelect">
+      <option value="">Todos</option>
+    </select>
+
+    <label for="subtypeSelect"><strong>Subtipo:</strong></label>
+    <select id="subtypeSelect">
+      <option value="">Todos</option>
+    </select>
+
+    <label for="typeSelect"><strong>Tipo:</strong></label>
+    <select id="typeSelect">
+      <option value="">Todos</option>
+    </select>
+    
+    <label for="raritySelect"><strong>Rareza:</strong></label>
+    <select id="raritySelect">
+      <option value="">Todas</option>
+    </select>
     </div>
 
     <input type="text" id="cardId" placeholder="Ingresa el nombre de la carta" />
@@ -62,23 +81,73 @@
       }
     });
 
-    // Llenar el select de sets al cargar la página
+// Llenar los selects al cargar la página
     document.addEventListener('DOMContentLoaded', async () => {
-      // Obtener sets de la API y llenar el select
       const setSelect = document.getElementById('setSelect');
+      const subtypeSelect = document.getElementById('subtypeSelect');
+      const raritySelect = document.getElementById('raritySelect');
+      const supertypeSelect = document.getElementById('supertypeSelect');
+      const typeSelect = document.getElementById('typeSelect');
+    
       try {
-        const res = await fetch('https://api.pokemontcg.io/v2/sets');
-        const data = await res.json();
-        if (data?.data?.length > 0) {
-          data.data.forEach(set => {
+        // Llenar sets
+        const setRes = await fetch('https://api.pokemontcg.io/v2/sets');
+        const setData = await setRes.json();
+        if (setData?.data?.length > 0) {
+          setData.data.forEach(set => {
             const option = document.createElement('option');
             option.value = set.id;
             option.textContent = `${set.name} (${set.id})`;
             setSelect.appendChild(option);
           });
         }
+      
+        // Llenar subtipos
+        const subtypeRes = await fetch('https://api.pokemontcg.io/v2/subtypes');
+        const subtypeData = await subtypeRes.json();
+        if (subtypeData?.data?.length > 0) {
+          subtypeData.data.forEach(sub => {
+            const option = document.createElement('option');
+            option.value = sub;
+            option.textContent = sub;
+            subtypeSelect.appendChild(option);
+          });
+        }
+      
+        // Llenar rarezas
+        const rarityRes = await fetch('https://api.pokemontcg.io/v2/rarities');
+        const rarityData = await rarityRes.json();
+        if (rarityData?.data?.length > 0) {
+          rarityData.data.forEach(r => {
+            const option = document.createElement('option');
+            option.value = r;
+            option.textContent = r;
+            raritySelect.appendChild(option);
+          });
+        }
+      
+        // Llenar tipos de carta (Pokémon, Entrenador, Energía)
+        const supertypes = ['Pokémon', 'Trainer', 'Energy'];
+        supertypes.forEach(type => {
+          const option = document.createElement('option');
+          option.value = type;
+          option.textContent = type;
+          supertypeSelect.appendChild(option);
+        });
+
+        const typesRes = await fetch('https://api.pokemontcg.io/v2/types');
+        const typesData = await typesRes.json();
+        if (typesData?.data?.length > 0) {
+          typesData.data.forEach(t => {
+            const option = document.createElement('option');
+            option.value = t;
+            option.textContent = t;
+            typeSelect.appendChild(option);
+          });
+        }
+      
       } catch (err) {
-        // Si falla, deja solo la opción por defecto
+        console.error('Error al llenar los selects:', err);
       }
     });
   </script>  

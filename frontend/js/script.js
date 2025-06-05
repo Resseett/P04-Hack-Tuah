@@ -1,7 +1,13 @@
 async function buscarCarta() {
   const cardName = document.getElementById("cardId").value.trim();
   const setId = document.getElementById("setSelect")?.value || "";
-  if (!cardName && !setId) return;
+  const supertype = document.getElementById("supertypeSelect")?.value || "";
+  const type = document.getElementById("typeSelect")?.value || "";
+  const subtype= document.getElementById("subtypeSelect")?.value || "";
+  const rarity = document.getElementById("raritySelect")?.value || "";
+
+  
+  if (!cardName && !setId && !supertype && !subtype && !type && !rarity) return;
 
   const div = document.getElementById("resultado");
   div.innerHTML = "<p>🔎 Buscando cartas...</p>";
@@ -11,6 +17,10 @@ async function buscarCarta() {
     let query = [];
     if (cardName) query.push(`name:${cardName}`);
     if (setId) query.push(`set.id:${setId}`);
+    if (supertype) query.push(`supertype:${supertype}`);
+    if (subtype) query.push(`subtypes:${subtype}`);
+    if (type) query.push(`types:${type}`);
+    if (rarity) query.push(`rarity:${rarity}`);
     const q = query.join(" ");
 
     const res = await fetch(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}`);

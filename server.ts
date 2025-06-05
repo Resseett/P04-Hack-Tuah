@@ -437,7 +437,7 @@ router.get("/api/trade/list", async (ctx) => {
 
   const wishes = tradeWishes[username] || [];
   ctx.response.body = { success: true, cards: wishes };
-};
+});
 
 
 
