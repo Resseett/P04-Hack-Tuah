@@ -33,8 +33,8 @@ async function buscarCarta() {
         const cartaDiv = document.createElement("div");
         cartaDiv.className = "carta";
 
-        const precio = carta.tcgplayer?.prices?.normal?.market
-          ? `$${carta.tcgplayer.prices.normal.market.toFixed(2)}`
+        const precio = carta.cardmarket?.prices?.averageSellPrice
+          ? `$${carta.cardmarket.prices.averageSellPrice.toFixed(2)}`
           : "No disponible";
 
         cartaDiv.innerHTML = `
