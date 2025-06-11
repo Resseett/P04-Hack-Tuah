@@ -163,13 +163,14 @@ router.post("/api/inventory/update", async (ctx) => {
   try {
     const { cardId, quantity } = await ctx.request.body({ type: "json" }).value;
 
-    if (!cardId || !quantity || quantity < 1) {
+    console.log("Actualizando inventario:", { cardId, quantity, type: typeof quantity });
+
+    if (!cardId || typeof quantity !== "number" || quantity < 1) {
       ctx.response.status = 400;
       ctx.response.body = { success: false, message: "Datos inválidos." };
       return;
     }
 
-    // 🔥 Usar getCookies para obtener la cookie
     const cookies = getCookies(ctx.request.headers);
     const username = cookies.loggedInUser;
 
@@ -179,17 +180,26 @@ router.post("/api/inventory/update", async (ctx) => {
       return;
     }
 
-    // Actualizar la cantidad en el inventario
-    inventories[username] = inventories[username].map((card) =>
-      typeof card === "string"
-        ? card // Si es un string, no lo modifica
-        : card.id === cardId
-        ? { ...card, quantity }
-        : card
-    );
+    // Buscar la carta y actualizar la cantidad
+    let updated = false;
+    for (const card of inventories[username]) {
+      if (typeof card === "object" && card !== null && String(card.id) === String(cardId)) {
+        console.log("Actualizando carta:", card.id, "de", card.quantity, "a", quantity);
+        card.quantity = quantity;
+        updated = true;
+        break;
+      }
+    }
 
-    // Guardar los cambios en el archivo
+    if (!updated) {
+      console.log("Carta no encontrada:", cardId, "en inventario de", username);
+      ctx.response.status = 404;
+      ctx.response.body = { success: false, message: "Carta no encontrada en el inventario." };
+      return;
+    }
+
     await saveInventories();
+    console.log("Inventario guardado correctamente.");
 
     ctx.response.body = { success: true };
   } catch (err) {
@@ -438,7 +448,6 @@ router.get("/api/trade/list", async (ctx) => {
   const wishes = tradeWishes[username] || [];
   ctx.response.body = { success: true, cards: wishes };
 });
-
 
 
 router.post("/api/inventory/toggle-trade", async (ctx) => {
