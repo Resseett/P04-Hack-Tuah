@@ -1,3 +1,6 @@
+// Variable global para almacenar las cartas del inventario
+let currentInventoryCards = [];
+
 async function fetchInventory() {
     const res = await fetch("/api/inventory", { credentials: "include" }); 
     const data = await res.json();
@@ -11,12 +14,136 @@ async function fetchCardDetails(id) {
     return data.data; // card data
 }
 
-// filepath: c:\Users\manue\OneDrive\Documentos\GitHub\P04-Hack-Tuah\public\js\inventory.js
-async function renderInventory() {
-    const container = document.getElementById("inventoryContainer");
-    container.innerHTML = "Cargando...";
+// Función para ordenar el inventario
+function ordenarInventario(criteria) {
+    if (currentInventoryCards.length === 0) return;
 
-    const cards = await fetchInventory();
+    let sortedCards = [...currentInventoryCards];
+
+    switch (criteria) {
+        case 'name':
+            sortedCards.sort((a, b) => {
+                const nameA = (a.cardDetails?.name || a.name || '').toLowerCase();
+                const nameB = (b.cardDetails?.name || b.name || '').toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+            break;
+        
+        case 'rarity':
+          const rarityOrder = {
+            // Básicas
+            'Common'                       :  1,
+            'Uncommon'                     :  2,
+            'Classic Collection'           :  3,
+            'Promo'                        :  4,
+
+            // Raras «simples»
+            'Rare'                         : 10,
+            'Radiant Rare'                 : 11,
+            'Amazing Rare'                 : 12,
+            'LEGEND'                       : 13,
+
+            // Holo y derivados
+            'Rare Holo'                    : 20,
+            'Trainer Gallery Rare Holo'    : 21,
+            'Rare Holo EX'                 : 22,
+            'Rare Holo GX'                 : 23,
+            'Rare Holo LVX'                : 24,
+            'Rare Holo Star'               : 25,
+            'Rare Holo V'                  : 26,
+            'Rare Holo VMAX'               : 27,
+            'Rare Holo VSTAR'              : 28,
+
+            // Otras rarezas de la era BW-XY
+            'Rare Prime'                   : 30,
+            'Rare BREAK'                   : 31,
+            'Rare Prism Star'              : 32,
+            'Rare Shining'                 : 33,
+            'Rare ACE'                     : 34,
+            'ACE SPEC Rare'                : 35,
+
+            // Brillantes y shinies
+            'Rare Shiny'                   : 40,
+            'Rare Shiny GX'                : 41,
+            'Shiny Rare'                   : 42,
+            'Shiny Ultra Rare'             : 43,
+
+            // Sistema Scarlet & Violet
+            'Double Rare'                  : 50,
+            'Illustration Rare'            : 60,
+            'Special Illustration Rare'    : 70,
+            'Ultra Rare'                   : 80,
+            'Rare Ultra'                   : 81,   // (etiqueta antigua equivalente)
+            'Hyper Rare'                   : 90,
+
+            // Final de tabla
+            'Rare Rainbow'                 : 95,
+            'Rare Secret'                  : 96,
+
+            // Valor por defecto
+            'Desconocida'                  : 999
+          };
+
+          sortedCards.sort((a, b) => {
+            const rarityA = a.cardDetails?.rarity || 'Desconocida';
+            const rarityB = b.cardDetails?.rarity || 'Desconocida';
+            const orderA  = rarityOrder[rarityA] ?? 999;
+            const orderB  = rarityOrder[rarityB] ?? 999;
+            return orderA - orderB;
+          });
+          break;
+
+        
+        case 'set':
+          sortedCards.sort((a, b) => {
+            // Tomamos el nombre del set desde donde esté disponible
+            const setA = (
+              a.cardDetails?.set?.name ||   // fuente principal
+              a.setName ||                  // por si lo guardas aparte
+              a.set ||                      // fallback genérico
+              ''
+            ).toLowerCase();
+
+            const setB = (
+              b.cardDetails?.set?.name ||
+              b.setName ||
+              b.set ||
+              ''
+            ).toLowerCase();
+
+            // Comparación alfabética insensible a tildes y mayúsculas
+            return setA.localeCompare(setB, undefined, { sensitivity: 'base' });
+          });
+          break;
+    }
+
+    // Renderizar las cartas ordenadas
+    renderInventoryCards(sortedCards);
+    
+    // Actualizar botones activos
+    updateSortButtons(criteria);
+}
+
+// Función para actualizar el estado visual de los botones
+function updateSortButtons(activeCriteria) {
+    const buttons = document.querySelectorAll('.btn-group button');
+    buttons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.add('btn-outline-primary');
+        btn.classList.remove('btn-primary');
+    });
+    
+    const activeButton = document.querySelector(`button[onclick="ordenarInventario('${activeCriteria}')"]`);
+    if (activeButton) {
+        activeButton.classList.add('active');
+        activeButton.classList.remove('btn-outline-primary');
+        activeButton.classList.add('btn-primary');
+    }
+}
+
+// Función separada para renderizar las cartas
+async function renderInventoryCards(cards) {
+    const container = document.getElementById("inventoryContainer");
     container.innerHTML = "";
 
     if (cards.length === 0) {
@@ -25,13 +152,8 @@ async function renderInventory() {
     }
 
     for (const card of cards) {
-        let cardDetails = null;
-        try {
-            cardDetails = await fetchCardDetails(card.id);
-        } catch (err) {
-            cardDetails = null;
-        }
-
+        const cardDetails = card.cardDetails;
+        
         // Si la API externa falla, usar los datos locales
         const name     = cardDetails?.name    || card.name;
         const image    = cardDetails?.images?.small || card.image;
@@ -76,8 +198,6 @@ async function renderInventory() {
         container.insertAdjacentHTML('beforeend', cardHTML);
         document.getElementById(`detailBtn-${card.id}`).addEventListener('click', () => showCardDetails(cardDetails || card));
         document.getElementById(`removeBtn-${card.id}`).addEventListener('click', () => removeCard(card.id));
-        
-
     }
 
     // Permitir guardar con Enter y feedback visual
@@ -86,12 +206,45 @@ async function renderInventory() {
         if (input) {
             input.addEventListener("keydown", (e) => {
                 if (e.key === "Enter") {
-                    saveQuantity(card.id); // This is correct as card.id is a variable here
+                    saveQuantity(card.id);
                 }
             });
         }
-        
     });
+}
+
+// filepath: c:\Users\manue\OneDrive\Documentos\GitHub\P04-Hack-Tuah\public\js\inventory.js
+async function renderInventory() {
+    const container = document.getElementById("inventoryContainer");
+    container.innerHTML = "Cargando...";
+
+    const cards = await fetchInventory();
+    container.innerHTML = "";
+
+    if (cards.length === 0) {
+        container.innerHTML = "<p>No tienes cartas en tu inventario.</p>";
+        currentInventoryCards = [];
+        return;
+    }
+
+    // Cargar detalles de todas las cartas y almacenarlas globalmente
+    currentInventoryCards = [];
+    for (const card of cards) {
+        let cardDetails = null;
+        try {
+            cardDetails = await fetchCardDetails(card.id);
+        } catch (err) {
+            cardDetails = null;
+        }
+        
+        currentInventoryCards.push({
+            ...card,
+            cardDetails: cardDetails
+        });
+    }
+
+    // Renderizar las cartas inicialmente
+    await renderInventoryCards(currentInventoryCards);
 }
 
 function showCardDetails(info) {
@@ -121,12 +274,9 @@ function showCardDetails(info) {
   ).show();
 }
 
-
 document.addEventListener("DOMContentLoaded", () => {
     renderInventory();
 });
-
-
 
 async function saveQuantity(cardId) {
     console.log("Guardando cantidad para carta:", cardId);
@@ -158,6 +308,12 @@ async function saveQuantity(cardId) {
             if (savedMsg) {
                 savedMsg.style.display = "inline";
                 setTimeout(() => savedMsg.style.display = "none", 1200);
+            }
+            
+            // Actualizar la cantidad en currentInventoryCards
+            const cardIndex = currentInventoryCards.findIndex(c => c.id === cardId);
+            if (cardIndex !== -1) {
+                currentInventoryCards[cardIndex].quantity = quantity;
             }
         } else {
             console.error("Error del servidor:", data.message);
@@ -231,8 +387,7 @@ function showToast(message, type) {
     setTimeout(() => {
         toast.remove();
     }, 3000);
-  }
-
+}
 
 async function toggleTradable(cardId, currentValue) {
   const res = await fetch("/api/inventory/tradable", {

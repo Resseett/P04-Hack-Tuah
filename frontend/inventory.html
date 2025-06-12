@@ -22,6 +22,14 @@
       </div>
     </div>
 
+    <div class="btn-group mb-4" role="group" aria-label="Ordenar por">
+  <button type="button" class="btn btn-outline-primary" onclick="ordenarInventario('name')">Nombre</button>
+  <button type="button" class="btn btn-outline-primary" onclick="ordenarInventario('rarity')">Rareza</button>
+  <button type="button" class="btn btn-outline-primary" onclick="ordenarInventario('set')">Set</button>
+</div>
+
+
+
     <div id="inventoryContainer" class="row row-cols-1 row-cols-md-3 g-4"></div>
 
   </main>
