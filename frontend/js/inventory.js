@@ -197,7 +197,10 @@ async function renderInventoryCards(cards) {
         `;
         container.insertAdjacentHTML('beforeend', cardHTML);
         document.getElementById(`detailBtn-${card.id}`).addEventListener('click', () => showCardDetails(cardDetails || card));
-        document.getElementById(`removeBtn-${card.id}`).addEventListener('click', () => removeCard(card.id));
+        // Cambiar aquí: usar removeCard como función global o definirla arriba
+        document.getElementById(`removeBtn-${card.id}`).addEventListener('click', async () => {
+            await removeCard(card.id);
+        });
     }
 
     // Permitir guardar con Enter y feedback visual
@@ -327,6 +330,38 @@ async function saveQuantity(cardId) {
         console.error("Error de red:", err);
         quantityInput.classList.add("is-invalid");
         setTimeout(() => quantityInput.classList.remove("is-invalid"), 1200);
+    }
+}
+
+async function toggleTradable(cardId, isCurrentlyTradable) {
+    const newTradableState = !isCurrentlyTradable;
+
+    try {
+        const res = await fetch("/api/inventory/tradable", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cardId: String(cardId), tradable: newTradableState }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            // Actualizar la carta en el array local
+            const card = currentInventoryCards.find(c => c.id === cardId);
+            if (card) {
+                card.isTradable = newTradableState;
+            }
+            
+            // Volver a renderizar la lista para reflejar el cambio.
+            // Se usan los filtros actuales para mantener la vista.
+            filterInventoryTypeSet();
+        } else {
+            alert(`Error al cambiar el estado de intercambio: ${data.message}`);
+        }
+    } catch (err) {
+        console.error("Error de red:", err);
+        alert("Error de red al cambiar el estado de intercambio.");
     }
 }
 
@@ -635,3 +670,28 @@ document.getElementById("statsBtn").addEventListener("click", async () => {
   // Mostrar modal
   new bootstrap.Modal(document.getElementById('statsModal')).show();
 });
+
+// Agrega la función removeCard global si no existe
+async function removeCard(cardId) {
+    if (!confirm("¿Seguro que quieres eliminar esta carta del inventario?")) return;
+    try {
+        const res = await fetch("/api/inventory/remove", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cardId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            // Elimina la carta del array local y vuelve a renderizar
+            currentInventoryCards = currentInventoryCards.filter(c => c.id !== cardId);
+            await renderInventoryCards(currentInventoryCards);
+            updateTypeSetFilterOptions();
+        } else {
+            alert(data.message || "No se pudo eliminar la carta.");
+        }
+    } catch (err) {
+        alert("Error al eliminar la carta.");
+        console.error(err);
+    }
+}

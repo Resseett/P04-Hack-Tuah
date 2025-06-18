@@ -234,7 +234,8 @@
         "Lightning"
       ],
       "price": "No disponible",
-      "quantity": 1
+      "quantity": 1,
+      "isTradable": false
     },
     {
       "id": "mcd19-7",
@@ -254,16 +255,6 @@
         "Fire"
       ],
       "price": "No disponible",
-      "quantity": 1
-    },
-    {
-      "id": "sv5-77",
-      "name": "Scream Tail",
-      "image": "https://images.pokemontcg.io/sv5/77_hires.png",
-      "types": [
-        "Psychic"
-      ],
-      "price": 0.11,
       "quantity": 1
     },
     {
