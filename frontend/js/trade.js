@@ -7,32 +7,34 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Formulario: añadir carta deseada ("Quiero obtener")
   const formDeseadas = document.getElementById("formDeseadas");
-  formDeseadas.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const input = document.getElementById("cardDeseada");
-    const cardId = input.value.trim();
-    if (!cardId) return;
+  if (formDeseadas) {
+    formDeseadas.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("cardDeseada");
+      const cardId = input.value.trim();
+      if (!cardId) return;
 
-    try {
-      const res = await fetch("/api/trade/add", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cardId }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        mostrarMensaje("Carta añadida a tu colección deseada");
-        input.value = "";
-        cargarCartasDeseadas();
-      } else {
-        mostrarMensaje(`Error: ${data.message}`);
+      try {
+        const res = await fetch("/api/trade/add", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cardId }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast("Carta añadida a tu colección deseada", "success");
+          input.value = "";
+          cargarCartasDeseadas();
+        } else {
+          showToast(`Error: ${data.message}`, "error");
+        }
+      } catch (err) {
+        console.error("Error al añadir carta deseada:", err);
+        showToast("Error al añadir carta deseada.", "error");
       }
-    } catch (err) {
-      console.error("Error al añadir carta deseada:", err);
-      mostrarMensaje("Error al añadir carta deseada.");
-    }
-  });
+    });
+  }
 });
 
 // Sección "Quiero obtener": listar cartas deseadas
@@ -128,6 +130,28 @@ async function cargarCartasIntercambiables() {
 }
 
 // Función de feedback (puede cambiarse por un toast)
-function mostrarMensaje(msg) {
-  alert(msg);
+function showToast(message, type = "success") {
+  const toastRoot = document.getElementById("toast-root");
+  if (!toastRoot) {
+    alert(message); // Fallback
+    return;
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `toast align-items-center text-bg-${type === "success" ? "success" : "danger"} border-0 show`;
+  toast.style.position = "fixed";
+  toast.style.bottom = "20px";
+  toast.style.right = "20px";
+  toast.style.zIndex = "9999";
+  toast.innerHTML = `
+      <div class="d-flex">
+          <div class="toast-body">${message}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+  `;
+  toastRoot.appendChild(toast);
+
+  setTimeout(() => {
+      toast.remove();
+  }, 3000);
 }

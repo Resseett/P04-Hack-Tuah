@@ -217,83 +217,93 @@
   ],
   "mmdw": [
     {
-      "id": "mcd19-12",
-      "name": "Eevee",
-      "image": "https://images.pokemontcg.io/mcd19/12_hires.png",
-      "types": [
-        "Colorless"
-      ],
-      "price": "No disponible",
-      "quantity": 3
-    },
-    {
-      "id": "mcd19-6",
+      "id": "mcd16-6",
       "name": "Pikachu",
-      "image": "https://images.pokemontcg.io/mcd19/6_hires.png",
+      "image": "https://images.pokemontcg.io/mcd16/6_hires.png",
       "types": [
         "Lightning"
       ],
+      "set": {
+        "id": "mcd16",
+        "name": "McDonald's Collection 2016"
+      },
+      "rarity": "Desconocida",
+      "price": "No disponible",
+      "quantity": 4
+    },
+    {
+      "id": "mcd16-5",
+      "name": "Totodile",
+      "image": "https://images.pokemontcg.io/mcd16/5_hires.png",
+      "types": [
+        "Water"
+      ],
+      "set": {
+        "id": "mcd16",
+        "name": "McDonald's Collection 2016"
+      },
+      "rarity": "Desconocida",
       "price": "No disponible",
       "quantity": 1,
-      "isTradable": false
+      "isTradable": true
     },
     {
-      "id": "mcd19-7",
-      "name": "Gastly",
-      "image": "https://images.pokemontcg.io/mcd19/7_hires.png",
+      "id": "mcd16-4",
+      "name": "Magikarp",
+      "image": "https://images.pokemontcg.io/mcd16/4_hires.png",
       "types": [
-        "Psychic"
+        "Water"
       ],
+      "set": {
+        "id": "mcd16",
+        "name": "McDonald's Collection 2016"
+      },
+      "rarity": "Desconocida",
       "price": "No disponible",
-      "quantity": 2
+      "quantity": 1
     },
     {
-      "id": "mcd19-3",
-      "name": "Magmar",
-      "image": "https://images.pokemontcg.io/mcd19/3_hires.png",
+      "id": "mcd16-12",
+      "name": "Eevee",
+      "image": "https://images.pokemontcg.io/mcd16/12_hires.png",
+      "types": [
+        "Colorless"
+      ],
+      "set": {
+        "id": "mcd16",
+        "name": "McDonald's Collection 2016"
+      },
+      "rarity": "Desconocida",
+      "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "mcd16-10",
+      "name": "Dedenne",
+      "image": "https://images.pokemontcg.io/mcd16/10_hires.png",
+      "types": [
+        "Fairy"
+      ],
+      "set": {
+        "id": "mcd16",
+        "name": "McDonald's Collection 2016"
+      },
+      "rarity": "Desconocida",
+      "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "mcd16-2",
+      "name": "Torchic",
+      "image": "https://images.pokemontcg.io/mcd16/2_hires.png",
       "types": [
         "Fire"
       ],
-      "price": "No disponible",
-      "quantity": 1
-    },
-    {
-      "id": "sv4-107",
-      "name": "Slither Wing",
-      "image": "https://images.pokemontcg.io/sv4/107_hires.png",
-      "types": [
-        "Fighting"
-      ],
-      "price": 0.08,
-      "quantity": 1
-    },
-    {
-      "id": "sv4-123",
-      "name": "Brute Bonnet",
-      "image": "https://images.pokemontcg.io/sv4/123_hires.png",
-      "types": [
-        "Darkness"
-      ],
-      "price": "No disponible",
-      "quantity": 1
-    },
-    {
-      "id": "sv4-251",
-      "name": "Roaring Moon ex",
-      "image": "https://images.pokemontcg.io/sv4/251_hires.png",
-      "types": [
-        "Darkness"
-      ],
-      "price": "No disponible",
-      "quantity": 1
-    },
-    {
-      "id": "sv4pt5-53",
-      "name": "Great Tusk ex",
-      "image": "https://images.pokemontcg.io/sv4pt5/53_hires.png",
-      "types": [
-        "Fighting"
-      ],
+      "set": {
+        "id": "mcd16",
+        "name": "McDonald's Collection 2016"
+      },
+      "rarity": "Desconocida",
       "price": "No disponible",
       "quantity": 1
     }

@@ -19,11 +19,11 @@
       <h1 class="text-center gradient-text mb-4">Cartas que quiero intercambiar</h1>
 
       <!-- Formulario para agregar carta -->
-      <div class="mb-3">
-        <label for="wantedCardId" class="form-label">ID de la carta deseada:</label>
-        <input type="text" id="wantedCardId" class="form-control" placeholder="Ej: xy7-54">
-        <button class="btn btn-primary mt-2 w-100" onclick="agregarCartaDeseada()">Agregar a la colección</button>
-      </div>
+      <form id="formDeseadas" class="mb-3">
+        <label for="cardDeseada" class="form-label">ID de la carta deseada:</label>
+        <input type="text" id="cardDeseada" class="form-control" placeholder="Ej: xy7-54">
+        <button type="submit" class="btn btn-primary mt-2 w-100">Agregar a la colección</button>
+      </form>
 
       <!-- Lista de cartas deseadas -->
       <h4 class="mt-4">Mi colección de cartas buscadas:</h4>
