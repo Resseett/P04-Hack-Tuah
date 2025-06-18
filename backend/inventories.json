@@ -244,7 +244,7 @@
         "Psychic"
       ],
       "price": "No disponible",
-      "quantity": 1
+      "quantity": 2
     },
     {
       "id": "mcd19-3",
@@ -252,6 +252,56 @@
       "image": "https://images.pokemontcg.io/mcd19/3_hires.png",
       "types": [
         "Fire"
+      ],
+      "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "sv5-77",
+      "name": "Scream Tail",
+      "image": "https://images.pokemontcg.io/sv5/77_hires.png",
+      "types": [
+        "Psychic"
+      ],
+      "price": 0.11,
+      "quantity": 1
+    },
+    {
+      "id": "sv4-107",
+      "name": "Slither Wing",
+      "image": "https://images.pokemontcg.io/sv4/107_hires.png",
+      "types": [
+        "Fighting"
+      ],
+      "price": 0.08,
+      "quantity": 1
+    },
+    {
+      "id": "sv4-123",
+      "name": "Brute Bonnet",
+      "image": "https://images.pokemontcg.io/sv4/123_hires.png",
+      "types": [
+        "Darkness"
+      ],
+      "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "sv4-251",
+      "name": "Roaring Moon ex",
+      "image": "https://images.pokemontcg.io/sv4/251_hires.png",
+      "types": [
+        "Darkness"
+      ],
+      "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "sv4pt5-53",
+      "name": "Great Tusk ex",
+      "image": "https://images.pokemontcg.io/sv4pt5/53_hires.png",
+      "types": [
+        "Fighting"
       ],
       "price": "No disponible",
       "quantity": 1

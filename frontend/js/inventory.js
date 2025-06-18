@@ -224,6 +224,7 @@ async function renderInventory() {
     if (cards.length === 0) {
         container.innerHTML = "<p>No tienes cartas en tu inventario.</p>";
         currentInventoryCards = [];
+        updateTypeSetFilterOptions();
         return;
     }
 
@@ -245,6 +246,7 @@ async function renderInventory() {
 
     // Renderizar las cartas inicialmente
     await renderInventoryCards(currentInventoryCards);
+    updateTypeSetFilterOptions();
 }
 
 function showCardDetails(info) {
@@ -276,6 +278,7 @@ function showCardDetails(info) {
 
 document.addEventListener("DOMContentLoaded", () => {
     renderInventory();
+    renderTypeSetFilters();
 });
 
 async function saveQuantity(cardId) {
@@ -327,94 +330,148 @@ async function saveQuantity(cardId) {
     }
 }
 
-document.getElementById("addCardBtn").addEventListener("click", async () => {
-    const cardId = document.getElementById("cardIdInput").value.trim();
-    if (!cardId) return alert("Ingresa un ID de carta");
+// Elimina el botón de buscar y agrega búsqueda automática al input
+const cardIdInput = document.getElementById("cardIdInput");
+const addCardBtn = document.getElementById("addCardBtn");
+if (addCardBtn) addCardBtn.remove();
 
-    const res = await fetch("/api/inventory/add", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cardId })
-    });
+cardIdInput.placeholder = "Buscar por nombre de carta...";
 
-    const data = await res.json();
-    if (data.success) {
-        showToast("Carta añadida con éxito");
-        document.getElementById("cardIdInput").value = "";
+cardIdInput.addEventListener("input", async () => {
+    const searchTerm = cardIdInput.value.trim().toLowerCase();
+    if (!searchTerm) {
         renderInventory();
-    } else {
-        showToast("Error: " + data.message);
+        return;
     }
+    if (!currentInventoryCards.length) {
+        await renderInventory();
+    }
+    const filtered = currentInventoryCards.filter(card => {
+        const name = (card.cardDetails?.name || card.name || "").toLowerCase();
+        return name.includes(searchTerm);
+    });
+    renderInventoryCards(filtered);
 });
 
-async function removeCard(cardId) {
-    if (!confirm("¿Seguro que quieres eliminar esta carta del inventario?")) return;
-    try {
-        const res = await fetch("/api/inventory/remove", {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cardId })
-        });
-        const data = await res.json();
-        if (data.success) {
-            showToast("Carta eliminada del inventario", "success");
-            renderInventory();
-        } else {
-            showToast("Error: " + data.message, "error");
-        }
-    } catch (err) {
-        showToast("Error de conexión", "error");
-    }
-}
+// --- Filtros por tipo, set y rareza debajo del input ---
+function renderTypeSetFilters() {
+    // Evita duplicados
+    if (document.getElementById("typeSetFiltersRow")) return;
 
-function showToast(message, type) {
-    const toast = document.createElement("div");
-    toast.className = `toast align-items-center text-bg-${type === "success" ? "success" : "danger"} border-0 show`;
-    toast.style.position = "fixed";
-    toast.style.bottom = "20px";
-    toast.style.right = "20px";
-    toast.style.zIndex = "9999";
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">${message}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
+    const container = cardIdInput.parentElement;
+    const filterRow = document.createElement("div");
+    filterRow.className = "row mb-3";
+    filterRow.id = "typeSetFiltersRow";
+    filterRow.style.gap = "10px";
+    filterRow.style.marginTop = "10px";
+
+    filterRow.innerHTML = `
+      <label for="typeFilterInv" class="form-label col-auto"><strong>Tipo:</strong></label>
+      <select id="typeFilterInv" class="form-select col-auto" style="max-width:140px"><option value="">Todos</option></select>
+      <label for="setFilterInv" class="form-label col-auto"><strong>Set:</strong></label>
+      <select id="setFilterInv" class="form-select col-auto" style="max-width:180px"><option value="">Todos</option></select>
+      <label for="rarityFilterInv" class="form-label col-auto"><strong>Rareza:</strong></label>
+      <select id="rarityFilterInv" class="form-select col-auto" style="max-width:140px"><option value="">Todas</option></select>
     `;
-    document.body.appendChild(toast);
-  
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
+
+    container.appendChild(filterRow);
+
+    updateTypeSetFilterOptions();
+
+    document.getElementById("typeFilterInv").addEventListener("change", filterInventoryTypeSet);
+    document.getElementById("setFilterInv").addEventListener("change", filterInventoryTypeSet);
+    document.getElementById("rarityFilterInv").addEventListener("change", filterInventoryTypeSet);
+    cardIdInput.addEventListener("input", filterInventoryTypeSet);
 }
 
-async function toggleTradable(cardId, currentValue) {
-  const res = await fetch("/api/inventory/tradable", {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cardId, tradable: !currentValue })
-  });
+function updateTypeSetFilterOptions() {
+    // Siempre usar todas las cartas del inventario para poblar los filtros
+    const typesSet = new Set();
+    const setsSet = new Set();
+    const raritiesSet = new Set();
+    for (const card of currentInventoryCards) {
+        const details = card.cardDetails || {};
+        // Tipo
+        if (Array.isArray(details.types)) details.types.forEach(t => typesSet.add(t));
+        // Set
+        if (details.set?.name) setsSet.add(details.set.name);
+        else if (card.setName) setsSet.add(card.setName);
+        // Rareza
+        let rarity = details.rarity || card.rarity;
+        if (!rarity || rarity === "" || rarity === undefined) rarity = "Desconocida";
+        raritiesSet.add(rarity);
+    }
+    const types = Array.from(typesSet).sort();
+    const sets = Array.from(setsSet).sort();
+    const rarities = Array.from(raritiesSet).sort();
 
-  const data = await res.json();
-  if (data.success) {
-    showToast("Estado de intercambio actualizado", "success");
-    renderInventory(); // Vuelve a renderizar para reflejar el nuevo estado
-  } else {
-    showToast("Error al actualizar: " + data.message, "danger");
-  }
+    const typeSelect = document.getElementById("typeFilterInv");
+    const setSelect = document.getElementById("setFilterInv");
+    const raritySelect = document.getElementById("rarityFilterInv");
+    if (!typeSelect || !setSelect || !raritySelect) return;
+
+    // Guardar selección previa
+    const prevType = typeSelect.value;
+    const prevSet = setSelect.value;
+    const prevRarity = raritySelect.value;
+
+    typeSelect.innerHTML = `<option value="">Todos</option>` + types.map(t => `<option value="${t}">${t}</option>`).join("");
+    setSelect.innerHTML = `<option value="">Todos</option>` + sets.map(s => `<option value="${s}">${s}</option>`).join("");
+    raritySelect.innerHTML = `<option value="">Todas</option>` + rarities.map(r => `<option value="${r}">${r}</option>`).join("");
+
+    // Restaurar selección previa si existe
+    typeSelect.value = prevType;
+    setSelect.value = prevSet;
+    raritySelect.value = prevRarity;
 }
 
+function filterInventoryTypeSet() {
+    const searchTerm = cardIdInput.value.trim().toLowerCase();
+    const typeValue = document.getElementById("typeFilterInv").value;
+    const setValue = document.getElementById("setFilterInv").value;
+    const rarityValue = document.getElementById("rarityFilterInv").value;
+
+    let filtered = currentInventoryCards;
+
+    if (searchTerm) {
+        filtered = filtered.filter(card => {
+            const name = (card.cardDetails?.name || card.name || "").toLowerCase();
+            return name.includes(searchTerm);
+        });
+    }
+    if (typeValue) {
+        filtered = filtered.filter(card => {
+            const types = card.cardDetails?.types || [];
+            return types.includes(typeValue);
+        });
+    }
+    if (setValue) {
+        filtered = filtered.filter(card => {
+            const setName = card.cardDetails?.set?.name || card.setName || "";
+            return setName === setValue;
+        });
+    }
+    if (rarityValue) {
+        filtered = filtered.filter(card => {
+            let rarity = card.cardDetails?.rarity || card.rarity;
+            if (!rarity || rarity === "" || rarity === undefined) rarity = "Desconocida";
+            return rarity === rarityValue;
+        });
+    }
+    renderInventoryCards(filtered);
+}
+
+// --- Estadísticas ---
 document.getElementById("statsBtn").addEventListener("click", async () => {
   const cards = await fetchInventory();
   const typeCounts = {};
   const setCounts = {};
   const setCards = {};
+  const rarityCounts = {};
   let totalCards = 0;
-  const setIdMap = {};
+  const setIdMap = {}
 
-  // 1. Agrupar cartas por set y contar
+  // 1. Agrupar cartas por set, tipo y rareza y contar
   for (const card of cards) {
     let details = null;
     try {
@@ -423,11 +480,13 @@ document.getElementById("statsBtn").addEventListener("click", async () => {
       details = card; // fallback
     }
 
+    // Tipos
     const types = details.types || [details.supertype || "Desconocido"];
     types.forEach(type => {
       typeCounts[type] = (typeCounts[type] || 0) + (card.quantity || 1);
     });
 
+    // Sets
     const setName = details.set?.name || "Desconocido";
     const setId = details.set?.id || "";
     setCounts[setName] = (setCounts[setName] || 0) + (card.quantity || 1);
@@ -443,6 +502,11 @@ document.getElementById("statsBtn").addEventListener("click", async () => {
       id: card.id,
       quantity: card.quantity || 1
     });
+
+    // Rarezas
+    let rarity = details.rarity || card.rarity;
+    if (!rarity || rarity === "" || rarity === undefined) rarity = "Desconocida";
+    rarityCounts[rarity] = (rarityCounts[rarity] || 0) + (card.quantity || 1);
 
     totalCards += card.quantity || 1;
   }
@@ -485,6 +549,46 @@ document.getElementById("statsBtn").addEventListener("click", async () => {
         <div class="progress-bar bg-info" role="progressbar" style="width: ${percentage}%;" aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100"></div>
       </div>
     `;
+  }
+
+  // Renderizar rarezas en su propia pestaña
+  let rarityStats = document.getElementById("rarityStats");
+  if (!rarityStats) {
+    rarityStats = document.createElement("div");
+    rarityStats.id = "rarityStats";
+    // Si el tab no existe, lo creamos (esto es para compatibilidad con el HTML actual)
+    const statsTabs = document.getElementById("statsTabs");
+    if (statsTabs && !document.getElementById("rarity-tab")) {
+      const li = document.createElement("li");
+      li.className = "nav-item";
+      li.role = "presentation";
+      li.innerHTML = `<button class="nav-link" id="rarity-tab" data-bs-toggle="tab" data-bs-target="#rarity" type="button" role="tab">Por Rareza</button>`;
+      statsTabs.appendChild(li);
+
+      // Agregar el tab-pane
+      const tabContent = document.querySelector(".tab-content");
+      const rarityPane = document.createElement("div");
+      rarityPane.className = "tab-pane fade";
+      rarityPane.id = "rarity";
+      rarityPane.role = "tabpanel";
+      rarityPane.innerHTML = `<div id="rarityStats"></div>`;
+      tabContent.appendChild(rarityPane);
+    }
+  }
+
+  // Llenar rarezas
+  rarityStats = document.getElementById("rarityStats");
+  if (rarityStats) {
+    rarityStats.innerHTML = "";
+    for (const [rarity, count] of Object.entries(rarityCounts)) {
+      const percentage = ((count / totalCards) * 100).toFixed(1);
+      rarityStats.innerHTML += `
+        <p><strong>${rarity}:</strong> ${percentage}%</p>
+        <div class="progress mb-3">
+          <div class="progress-bar bg-warning" role="progressbar" style="width: ${percentage}%;" aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      `;
+    }
   }
 
   // Renderizar sets con cartas y barra de progreso

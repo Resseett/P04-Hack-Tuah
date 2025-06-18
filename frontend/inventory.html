@@ -10,7 +10,7 @@
   <div id="navbar"></div>
 
   <main class="container mt-5">
-    <h1>Mi Inventario de Cartas</h1>
+    <h1>Tu Inventario de Cartas</h1>
 
     <div class="mb-4">
       <div>
@@ -55,6 +55,9 @@
               <li class="nav-item" role="presentation">
                 <button class="nav-link" id="sets-tab" data-bs-toggle="tab" data-bs-target="#sets" type="button" role="tab">Por Set</button>
               </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rarity-tab" data-bs-toggle="tab" data-bs-target="#rarity" type="button" role="tab">Por Rareza</button>
+              </li>
             </ul>
             <div class="tab-content mt-3">
               <div class="tab-pane fade show active" id="types" role="tabpanel">
@@ -62,6 +65,9 @@
               </div>
               <div class="tab-pane fade" id="sets" role="tabpanel">
                 <div id="setsStats"></div>
+              </div>
+              <div class="tab-pane fade" id="rarity" role="tabpanel">
+                <div id="rarityStats"></div>
               </div>
             </div>
           </div>
