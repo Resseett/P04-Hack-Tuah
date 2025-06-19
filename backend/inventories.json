@@ -471,5 +471,77 @@
       "price": "No disponible",
       "quantity": 1
     }
+  ],
+  "muna": [
+    {
+      "id": "sm5-14",
+      "name": "Mow Rotom",
+      "image": "https://images.pokemontcg.io/sm5/14_hires.png",
+      "types": [
+        "Grass"
+      ],
+      "price": 0.51,
+      "quantity": 1
+    },
+    {
+      "id": "xy8-22",
+      "name": "M Houndoom-EX",
+      "image": "https://images.pokemontcg.io/xy8/22_hires.png",
+      "types": [
+        "Fire"
+      ],
+      "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "pop3-1",
+      "name": "Blastoise",
+      "image": "https://images.pokemontcg.io/pop3/1_hires.png",
+      "types": [
+        "Water"
+      ],
+      "price": 65.05,
+      "quantity": 1
+    },
+    {
+      "id": "base1-4",
+      "name": "Charizard",
+      "image": "https://images.pokemontcg.io/base1/4_hires.png",
+      "types": [
+        "Fire"
+      ],
+      "price": "No disponible",
+      "quantity": 2
+    },
+    {
+      "id": "sv3pt5-170",
+      "name": "Squirtle",
+      "image": "https://images.pokemontcg.io/sv3pt5/170_hires.png",
+      "types": [
+        "Water"
+      ],
+      "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "xyp-XY84",
+      "name": "Pikachu-EX",
+      "image": "https://images.pokemontcg.io/xyp/XY84_hires.png",
+      "types": [
+        "Lightning"
+      ],
+      "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "xyp-XY174",
+      "name": "Pikachu-EX",
+      "image": "https://images.pokemontcg.io/xyp/XY174_hires.png",
+      "types": [
+        "Lightning"
+      ],
+      "price": "No disponible",
+      "quantity": 1
+    }
   ]
 }

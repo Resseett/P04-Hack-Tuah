@@ -1,0 +1,83 @@
+.scan-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.preview-img {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  object-fit: contain;
+}
+
+.scan-result-box {
+  margin-top: 20px;
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.scan-info {
+  margin-bottom: 8px;
+}
+
+.scan-error {
+  color: red;
+  font-weight: bold;
+}
+
+.scan-success {
+  color: green;
+  font-weight: bold;
+}
+
+.card-matches-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.card-suggestion {
+  width: 220px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.card-suggestion img.card-img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.card-suggestion p {
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.card-suggestion .add-btn {
+  margin-top: 8px;
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.card-suggestion .add-btn:hover {
+  background-color: #27ae60;
+}
