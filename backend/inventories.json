@@ -319,7 +319,8 @@
       "price": 0.16,
       "quantity": 1,
       "trade": false,
-      "isTradable": true
+      "isTradable": true,
+      "favorite": true
     },
     {
       "id": "sv5-123",
@@ -329,7 +330,8 @@
         "Dragon"
       ],
       "price": "No disponible",
-      "quantity": 1
+      "quantity": 1,
+      "favorite": true
     },
     {
       "id": "sv5-196",
@@ -339,7 +341,8 @@
         "Dragon"
       ],
       "price": "No disponible",
-      "quantity": 1
+      "quantity": 1,
+      "favorite": true
     },
     {
       "id": "sv5-208",
@@ -359,7 +362,8 @@
         "Fairy"
       ],
       "price": "No disponible",
-      "quantity": 1
+      "quantity": 1,
+      "favorite": true
     },
     {
       "id": "xy6-54",
@@ -389,7 +393,8 @@
         "Fire"
       ],
       "price": "No disponible",
-      "quantity": 1
+      "quantity": 1,
+      "favorite": true
     },
     {
       "id": "swsh5-22",

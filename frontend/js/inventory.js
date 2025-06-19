@@ -191,6 +191,11 @@ async function renderInventoryCards(cards) {
                                 ${card.isTradable ? "Quitar de intercambio" : "Marcar como intercambiable"}
                             </button>
                         </div>
+                        <div class="d-flex align-items-center mt-2">
+                          <button class="btn btn-outline-danger w-100" onclick="toggleFavorite('${card.id}', ${card.favorite ?? false})">
+                            ${card.favorite ? "Quitar de favoritas ❤️" : "Marcar como favorita 🤍"}
+                          </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -407,6 +412,8 @@ function renderTypeSetFilters() {
       <select id="setFilterInv" class="form-select col-auto" style="max-width:180px"><option value="">Todos</option></select>
       <label for="rarityFilterInv" class="form-label col-auto"><strong>Rareza:</strong></label>
       <select id="rarityFilterInv" class="form-select col-auto" style="max-width:140px"><option value="">Todas</option></select>
+      <label for="favoriteFilterInv" class="form-label col-auto"><strong>Favoritas:</strong></label>
+      <select id="favoriteFilterInv" class="form-select col-auto" style="max-width:140px"><option value="">Todas</option><option value="true">Solo favoritas</option><option value="false">Solo no favoritas</option></select>
     `;
 
     container.appendChild(filterRow);
@@ -416,6 +423,7 @@ function renderTypeSetFilters() {
     document.getElementById("typeFilterInv").addEventListener("change", filterInventoryTypeSet);
     document.getElementById("setFilterInv").addEventListener("change", filterInventoryTypeSet);
     document.getElementById("rarityFilterInv").addEventListener("change", filterInventoryTypeSet);
+    document.getElementById("favoriteFilterInv").addEventListener("change", filterInventoryTypeSet);
     cardIdInput.addEventListener("input", filterInventoryTypeSet);
 }
 
@@ -424,6 +432,7 @@ function updateTypeSetFilterOptions() {
     const typesSet = new Set();
     const setsSet = new Set();
     const raritiesSet = new Set();
+    
     for (const card of currentInventoryCards) {
         const details = card.cardDetails || {};
         // Tipo
@@ -435,14 +444,17 @@ function updateTypeSetFilterOptions() {
         let rarity = details.rarity || card.rarity;
         if (!rarity || rarity === "" || rarity === undefined) rarity = "Desconocida";
         raritiesSet.add(rarity);
+        
     }
     const types = Array.from(typesSet).sort();
     const sets = Array.from(setsSet).sort();
     const rarities = Array.from(raritiesSet).sort();
+    
 
     const typeSelect = document.getElementById("typeFilterInv");
     const setSelect = document.getElementById("setFilterInv");
     const raritySelect = document.getElementById("rarityFilterInv");
+    
     if (!typeSelect || !setSelect || !raritySelect) return;
 
     // Guardar selección previa
@@ -465,8 +477,15 @@ function filterInventoryTypeSet() {
     const typeValue = document.getElementById("typeFilterInv").value;
     const setValue = document.getElementById("setFilterInv").value;
     const rarityValue = document.getElementById("rarityFilterInv").value;
+    const favFilter = document.getElementById("favoriteFilterInv").value;
 
     let filtered = currentInventoryCards;
+
+    if (favFilter === "true") {
+      filtered = filtered.filter(card => card.favorite === true);
+    } else if (favFilter === "false") {
+        filtered = filtered.filter(card => card.favorite !== true);
+    }
 
     if (searchTerm) {
         filtered = filtered.filter(card => {
@@ -693,5 +712,34 @@ async function removeCard(cardId) {
     } catch (err) {
         alert("Error al eliminar la carta.");
         console.error(err);
+    }
+    
+}
+
+async function toggleFavorite(cardId, isCurrentlyFavorite) {
+    const newFavoriteState = !isCurrentlyFavorite;
+
+    try {
+        const res = await fetch("/api/inventory/favorite", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cardId: String(cardId), favorite: newFavoriteState }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            // Actualizar localmente
+            const card = currentInventoryCards.find(c => c.id === cardId);
+            if (card) card.favorite = newFavoriteState;
+            // Re-renderizar inventario filtrado si corresponde
+            filterInventoryTypeSet();
+        } else {
+            alert(`Error al cambiar favorito: ${data.message}`);
+        }
+    } catch (err) {
+        console.error("Error al guardar favorito:", err);
+        alert("Error de red.");
     }
 }

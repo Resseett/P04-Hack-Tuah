@@ -523,6 +523,44 @@ router.post("/api/inventory/tradable", async (ctx) => {
 
 
 app.use(router.routes());
+router.post("/api/inventory/favorite", async (ctx) => {
+  const cookies = getCookies(ctx.request.headers);
+  const username = cookies.loggedInUser;
+
+  if (!username) {
+    ctx.response.status = 401;
+    ctx.response.body = { success: false, message: "No autenticado." };
+    return;
+  }
+
+  const { cardId, favorite } = await ctx.request.body({ type: "json" }).value;
+
+  if (!cardId || typeof favorite !== "boolean") {
+    ctx.response.status = 400;
+    ctx.response.body = { success: false, message: "Datos inválidos." };
+    return;
+  }
+
+  const userInventory = inventories[username];
+  if (!userInventory) {
+    ctx.response.status = 404;
+    ctx.response.body = { success: false, message: "Inventario no encontrado." };
+    return;
+  }
+
+  const card = userInventory.find((c) => c.id === cardId);
+  if (!card) {
+    ctx.response.status = 404;
+    ctx.response.body = { success: false, message: "Carta no encontrada." };
+    return;
+  }
+
+  card.favorite = favorite;
+
+  await saveInventories();
+
+  ctx.response.body = { success: true };
+});
 app.use(router.allowedMethods());
 
 console.log("🚀 Servidor corriendo en http://localhost:8000");
