@@ -96,6 +96,10 @@ button:hover {
 
 #resultado {
   margin-top: 30px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 #resultado {
   display: grid;
@@ -104,6 +108,7 @@ button:hover {
   justify-items: center;
   margin-top: 30px;
   padding: 0 20px;
+  padding-bottom: 40px;
 }
 
 .carta {
@@ -257,7 +262,8 @@ input.form-control {
   .carta p {
     font-size: 0.9em;
   }
-/* Estilos para pantallas pequeñas (móviles) */
+
+  /* Estilos para pantallas pequeñas (móviles) */
 @media (max-width: 768px) {
   nav {
     flex-direction: column;
@@ -536,4 +542,74 @@ input.form-control {
   margin: 5px 0;
   font-size: 14px;
   color: #333;
+}
+
+#paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 40px auto 0 auto;
+  max-width: 100%;
+  width: 100%;
+  padding: 16px 0;
+  box-sizing: border-box;
+}
+
+.paginacion-btn {
+  background: #e91e63;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 18px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(233, 30, 99, 0.08);
+  outline: none;
+  display: inline-block;
+}
+
+.paginacion-btn:disabled,
+.paginacion-btn[disabled] {
+  background: #fff;
+  color: #e91e63;
+  border: 2px solid #e91e63;
+  cursor: default;
+  font-weight: bold;
+}
+
+.paginacion-btn.active,
+.paginacion-btn[aria-current="page"] {
+  background: #fff;
+  color: #e91e63;
+  border: 2px solid #e91e63;
+  font-weight: bold;
+  cursor: default;
+}
+
+#paginacion .elipsis {
+  margin: 0 4px;
+  color: #888;
+  font-size: 1.1rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0 8px;
+  pointer-events: none;
+  display: inline-block;
+}
+
+@media (max-width: 900px) {
+  #paginacion {
+    gap: 6px;
+  }
+
+  .paginacion-btn {
+    padding: 4px 10px;
+    font-size: 0.95rem;
+  }
 }
