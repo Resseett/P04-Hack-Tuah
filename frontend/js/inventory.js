@@ -156,7 +156,7 @@ async function renderInventoryCards(cards) {
         
         // Si la API externa falla, usar los datos locales
         const name     = cardDetails?.name    || card.name;
-        const image    = cardDetails?.images?.small || card.image;
+        const image    = cardDetails?.images?.large || card.image;
         const setName  = cardDetails?.set?.name || 'Desconocido';        
         const setId    = cardDetails?.set?.id   || '';
         const types    = cardDetails?.types?.join(', ') || 'Desconocido'; 
@@ -166,7 +166,7 @@ async function renderInventoryCards(cards) {
         const cardHTML = `
             <div class="col inventory-card-col">
                 <div class="card h-100 inventory-card">
-                    <img src="${image}" class="card-img-top" alt="${name}">
+                    <img src="${image}" class="card-img-top img-fluid" alt="${name}">
                     <div class="card-body">
                         <h5 class="card-title">${name}</h5>
                         <p class="card-text">ID: ${card.id}</p>

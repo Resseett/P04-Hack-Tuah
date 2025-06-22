@@ -116,7 +116,6 @@ button:hover {
   border: 1px solid #ddd;
   border-radius: 10px;
   padding: 10px;
-  max-width: 220px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   text-align: center;
   transition: transform 0.3s;
@@ -246,7 +245,6 @@ input.form-control {
   }
 
   .carta {
-    max-width: 180px;
     padding: 8px;
   }
 
@@ -262,6 +260,12 @@ input.form-control {
   .carta p {
     font-size: 0.9em;
   }
+  
+@media (min-width: 800px) and (max-width: 1024px) {
+  #inventoryContainer, #resultado {
+    /*display: grid;*/
+  }
+}
 
   /* Estilos para pantallas pequeñas (móviles) */
 @media (max-width: 768px) {
@@ -319,7 +323,6 @@ input.form-control {
   }
 
   .carta {
-    max-width: 150px;
     padding: 6px;
   }
 
@@ -354,7 +357,6 @@ input.form-control {
 /* Estilos para pantallas muy pequeñas (teléfonos) */
 @media (max-width: 480px) {
   #resultado {
-    grid-template-columns: repeat(3, 1fr); /* Display 3 cards per row */
     gap: 10px; /* Adjust gap for smaller screens */
   }
 
@@ -378,7 +380,7 @@ input.form-control {
 }
 /* Ajustar el diseño del contenedor de inventario */
 #inventoryContainer {
-  display: grid;
+  /*display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Más columnas en pantallas grandes */
   gap: 20px;
   justify-items: center;
@@ -386,35 +388,28 @@ input.form-control {
   padding: 0 20px;
 }
 
-/* Para pantallas entre 573px y 1281px */
-@media (min-width: 573px) and (max-width: 1281px) {
-  #inventoryContainer {
-    grid-template-columns: repeat(3, 1fr); /* Mostrar 3 columnas */
-  }
-}
-
 .inventory-card-col {
   padding: 0 !important;
 }
 
 .inventory-card {
-  max-width: 80px;
+  width: 100%;
   padding: 2px;
 }
 
 .inventory-card img {
-  width: 90%;
-  max-width: 32px;
+  width: 100%;
+
   border-radius: 5px;
 }
 
 .inventory-card h5 {
-  font-size: 0.55em;
+  font-size: 0.9em;
   margin-bottom: 0.3em;
 }
 
 .inventory-card p {
-  font-size: 0.38em;
+  font-size: 0.8em;
   margin-bottom: 0.2em;
 }
 
@@ -454,37 +449,25 @@ input.form-control {
 
 @media (max-width: 768px) {
   .inventory-card {
-    max-width: 60px;
     padding: 1px;
   }
   .inventory-card img {
-    max-width: 24px;
-  }
-  .inventory-card h5 {
-    font-size: 0.45em;
-  }
-  .inventory-card p {
-    font-size: 0.32em;
+    width: 100%;
+    height: auto;
   }
 }
 
 @media (max-width: 480px) {
   #inventoryContainer {
-    grid-template-columns: repeat(2, 1fr);
+    /*grid-template-columns: repeat(2, 1fr);*/
     gap: 10px;
   }
   .inventory-card {
-    max-width: 48px;
     padding: 0;
   }
   .inventory-card img {
-    max-width: 18px;
-  }
-  .inventory-card h5 {
-    font-size: 0.35em;
-  }
-  .inventory-card p {
-    font-size: 0.25em;
+    width: 100%;
+    height: auto;
   }
 }
 
@@ -613,3 +596,4 @@ input.form-control {
     font-size: 0.95rem;
   }
 }
+
