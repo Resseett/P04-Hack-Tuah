@@ -11,4 +11,4 @@ COPY . .
 EXPOSE 8000
 
 # Comando para ejecutar tu aplicación Deno
-CMD ["deno","run", "dev"]
+CMD ["run", "dev"]
