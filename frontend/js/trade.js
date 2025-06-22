@@ -72,6 +72,7 @@ async function cargarCartasDeseadas() {
           <div class="card-body p-1">
             <p class="card-text mb-1"><strong>Set:</strong> ${details.set.name}</p>
             <p class="card-text"><strong>N°:</strong> ${details.number}</p>
+            <p class="card-text"><strong>Precio:</strong> ${details.cardmarket?.prices?.averageSellPrice?.toFixed(2) ?? "No disponible"} USD</p>
           </div>
         </div>`;
       container.appendChild(col);
@@ -119,6 +120,7 @@ async function cargarCartasIntercambiables() {
           <div class="card-body p-1">
             <p class="card-text mb-1"><strong>Set:</strong> ${details.set.name}</p>
             <p class="card-text"><strong>N°:</strong> ${details.number}</p>
+            <p class="card-text"><strong>Precio:</strong> ${details.cardmarket?.prices?.averageSellPrice?.toFixed(2) ?? "No disponible"} USD</p>
           </div>
         </div>`;
       container.appendChild(col);
@@ -155,3 +157,17 @@ function showToast(message, type = "success") {
       toast.remove();
   }, 3000);
 }
+
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    cargarCartasDeseadas,
+    cargarCartasIntercambiables,
+    showToast
+  };
+}
+
+// En el navegador, seguimos teniendo las funciones en ámbito global:
+window.cargarCartasDeseadas = cargarCartasDeseadas;
+window.cargarCartasIntercambiables = cargarCartasIntercambiables;
+window.showToast = showToast;

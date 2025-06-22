@@ -475,6 +475,16 @@
       ],
       "price": "No disponible",
       "quantity": 1
+    },
+    {
+      "id": "sv3pt5-199",
+      "name": "Charizard ex",
+      "image": "https://images.pokemontcg.io/sv3pt5/199_hires.png",
+      "types": [
+        "Fire"
+      ],
+      "price": "No disponible",
+      "quantity": 1
     }
   ],
   "muna": [

@@ -284,10 +284,12 @@ function showCardDetails(info) {
   ).show();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    renderInventory();
-    renderTypeSetFilters();
-});
+if (typeof document !== 'undefined') {
+    document.addEventListener("DOMContentLoaded", () => {
+        renderInventory();
+        renderTypeSetFilters();
+    });
+}
 
 async function saveQuantity(cardId) {
     console.log("Guardando cantidad para carta:", cardId);
@@ -371,27 +373,32 @@ async function toggleTradable(cardId, isCurrentlyTradable) {
 }
 
 // Elimina el botón de buscar y agrega búsqueda automática al input
-const cardIdInput = document.getElementById("cardIdInput");
-const addCardBtn = document.getElementById("addCardBtn");
-if (addCardBtn) addCardBtn.remove();
+if (typeof document !== 'undefined') {
+  const cardIdInput = document.getElementById("cardIdInput");
+  const addCardBtn = document.getElementById("addCardBtn");
 
-cardIdInput.placeholder = "Buscar por nombre de carta...";
+  if (addCardBtn) addCardBtn.remove();
 
-cardIdInput.addEventListener("input", async () => {
-    const searchTerm = cardIdInput.value.trim().toLowerCase();
-    if (!searchTerm) {
+  if (cardIdInput) {
+    cardIdInput.placeholder = "Buscar por nombre de carta...";
+
+    cardIdInput.addEventListener("input", async () => {
+      const searchTerm = cardIdInput.value.trim().toLowerCase();
+      if (!searchTerm) {
         renderInventory();
         return;
-    }
-    if (!currentInventoryCards.length) {
+      }
+      if (!currentInventoryCards.length) {
         await renderInventory();
-    }
-    const filtered = currentInventoryCards.filter(card => {
+      }
+      const filtered = currentInventoryCards.filter(card => {
         const name = (card.cardDetails?.name || card.name || "").toLowerCase();
         return name.includes(searchTerm);
+      });
+      renderInventoryCards(filtered);
     });
-    renderInventoryCards(filtered);
-});
+  }
+}
 
 // --- Filtros por tipo, set y rareza debajo del input ---
 function renderTypeSetFilters() {
