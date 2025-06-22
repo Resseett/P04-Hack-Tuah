@@ -126,7 +126,6 @@ async function mostrarResultados(nombre, uploadedColor, tipoCarta) {
   });
 }
 
-// --- Lógica de agregar al inventario (adaptada de script.js) ---
 async function agregarAlInventario(cardId, cardDiv) {
   try {
     const res = await fetch("/api/inventory/add", {

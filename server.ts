@@ -1,6 +1,7 @@
 import { Application, Router, send } from "https://deno.land/x/oak@v12.6.1/mod.ts";
-import { setCookie, getCookies } from "https://deno.land/std/http/cookie.ts";
-import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
+import { setCookie, getCookies } from "https://deno.land/std@0.224.0/http/cookie.ts";
+import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+
 
 // Cargar usuarios desde JSON
 const users = JSON.parse(await Deno.readTextFile("backend/users.json"));
@@ -447,7 +448,7 @@ router.get("/api/trade/list", async (ctx) => {
 
   const wishes = tradeWishes[username] || [];
   ctx.response.body = { success: true, cards: wishes };
-};
+});
 
 
 router.post("/api/inventory/toggle-trade", async (ctx) => {

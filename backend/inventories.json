@@ -109,6 +109,26 @@
       ],
       "price": 0.05,
       "quantity": 1
+    },
+    {
+      "id": "base2-10",
+      "name": "Scyther",
+      "image": "https://images.pokemontcg.io/base2/10_hires.png",
+      "types": [
+        "Grass"
+      ],
+      "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "base4-3",
+      "name": "Chansey",
+      "image": "https://images.pokemontcg.io/base4/3_hires.png",
+      "types": [
+        "Colorless"
+      ],
+      "price": "No disponible",
+      "quantity": 2
     }
   ],
   "asdf": [
