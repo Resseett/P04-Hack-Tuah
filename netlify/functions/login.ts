@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { setCookie } from "https://deno.land/std@0.224.0/http/cookie.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
-import { MongoClient } from "npm:mongodb@6.17.0";
+import { MongoClient } from "mongodb";
 
 const client = new MongoClient(Deno.env.get("MONGO_URI") || "");
 
