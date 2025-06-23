@@ -1,10 +1,14 @@
 import { Application, Router, send } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import { setCookie, getCookies } from "https://deno.land/std/http/cookie.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
+import { ensureDir } from "https://deno.land/std@0.200.0/fs/mod.ts";
 
 // Cargar usuarios desde JSON
+
 const users = JSON.parse(await Deno.readTextFile("backend/users.json"));
 console.log("Usuarios cargados:", users);
+const DATA_DIR = "./backend/data";
+await ensureDir(DATA_DIR);
 
 let tradeWishes = {};
 try {
@@ -19,6 +23,66 @@ async function saveTradeWishes() {
 
 const app = new Application();
 const router = new Router();
+
+// Guardado temporal del mazo actual
+router.post("/api/deck", async (ctx) => {
+  const { deck } = await ctx.request.body({ type: "json" }).value;
+  await Deno.writeTextFile(`${DATA_DIR}/temp_deck.json`, JSON.stringify(deck, null, 2));
+  ctx.response.body = { success: true };
+});
+
+// Cargar mazo temporal
+router.get("/api/deck", async (ctx) => {
+  try {
+    const raw = await Deno.readTextFile(`${DATA_DIR}/temp_deck.json`);
+    ctx.response.body = { success: true, deck: JSON.parse(raw) };
+  } catch {
+    ctx.response.body = { success: false, message: "No hay mazo temporal guardado" };
+  }
+});
+
+// Guardar mazo con nombre
+router.post("/api/decks/save", async (ctx) => {
+  const { name, cards, totalCards, createdAt, updatedAt } = await ctx.request.body({ type: "json" }).value;
+  const path = `${DATA_DIR}/decks_${encodeURIComponent(name)}.json`;
+  await Deno.writeTextFile(path, JSON.stringify({ name, cards, totalCards, createdAt, updatedAt }, null, 2));
+  ctx.response.body = { success: true };
+});
+
+// Listar todos los mazos guardados
+router.get("/api/decks", async (ctx) => {
+  const entries: any[] = [];
+  for await (const dirEntry of Deno.readDir(DATA_DIR)) {
+    if (dirEntry.name.startsWith("decks_") && dirEntry.name.endsWith(".json")) {
+      const raw = await Deno.readTextFile(`${DATA_DIR}/${dirEntry.name}`);
+      entries.push(JSON.parse(raw));
+    }
+  }
+  ctx.response.body = { success: true, decks: entries };
+});
+
+// Cargar un mazo por nombre
+router.get("/api/decks/:name", async (ctx) => {
+  const name = ctx.params.name!;
+  try {
+    const raw = await Deno.readTextFile(`${DATA_DIR}/decks_${encodeURIComponent(name)}.json`);
+    ctx.response.body = { success: true, deck: JSON.parse(raw) };
+  } catch {
+    ctx.response.body = { success: false, message: "Mazo no encontrado" };
+  }
+});
+
+// Eliminar un mazo por nombre
+router.delete("/api/decks/:name", async (ctx) => {
+  const name = ctx.params.name!;
+  try {
+    await Deno.remove(`${DATA_DIR}/decks_${encodeURIComponent(name)}.json`);
+    ctx.response.body = { success: true };
+  } catch {
+    ctx.response.body = { success: false, message: "No se pudo eliminar" };
+  }
+});
+
 
 // Servir archivos estáticos
 router.get("/components/:file", async (ctx) => {
@@ -261,6 +325,8 @@ async function saveInventories() {
     console.error("Error al guardar el inventario:", err);
   }
 }
+
+
 
 // Ruta para obtener inventario del usuario current
 router.get("/api/inventory", async (ctx) => {

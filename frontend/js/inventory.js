@@ -1,6 +1,11 @@
 // Variable global para almacenar las cartas del inventario
 let currentInventoryCards = [];
 
+let deck = {};
+let totalDeckCards = 0;
+let savedDecks = []; // Lista de mazos guardados
+let currentDeckName = ""; // Nombre del mazo actual
+
 async function fetchInventory() {
     const res = await fetch("/api/inventory", { credentials: "include" }); 
     const data = await res.json();
@@ -13,6 +18,329 @@ async function fetchCardDetails(id) {
     const data = await res.json();
     return data.data; // card data
 }
+
+// === FUNCIONES DE GESTIÓN DE MAZOS ===
+
+// Cargar mazos desde el servidor
+async function loadSavedDecks() {
+    try {
+        const res = await fetch("/api/decks", { credentials: "include" });
+        const data = await res.json();
+        if (data.success) {
+            savedDecks = data.decks || [];
+            renderSavedDecks();
+            return savedDecks;
+        }
+    } catch (err) {
+        console.error("Error cargando mazos guardados:", err);
+    }
+    return [];
+}
+
+// Guardar mazo actual con nombre
+async function saveDeckWithName() {
+    const deckName = prompt("Introduce un nombre para tu mazo:");
+    if (!deckName || deckName.trim() === "") return;
+    
+    if (Object.keys(deck).length === 0) {
+        alert("No puedes guardar un mazo vacío.");
+        return;
+    }
+
+    const deckData = {
+        name: deckName.trim(),
+        cards: { ...deck },
+        totalCards: totalDeckCards,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
+
+    try {
+        const res = await fetch("/api/decks/save", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(deckData)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            currentDeckName = deckName.trim();
+            await loadSavedDecks(); // Recargar la lista
+            alert("Mazo guardado exitosamente!");
+            updateDeckNameDisplay();
+        } else {
+            alert(`Error al guardar el mazo: ${data.message}`);
+        }
+    } catch (err) {
+        console.error("Error guardando mazo:", err);
+        alert("Error de red al guardar el mazo.");
+    }
+}
+
+// Cargar un mazo guardado
+async function loadDeck(deckName) {
+    try {
+        const res = await fetch(`/api/decks/${encodeURIComponent(deckName)}`, { 
+            credentials: "include" 
+        });
+        const data = await res.json();
+        
+        if (data.success && data.deck) {
+            // Limpiar mazo actual
+            deck = {};
+            totalDeckCards = 0;
+            
+            // Cargar el mazo
+            deck = { ...data.deck.cards };
+            totalDeckCards = data.deck.totalCards || Object.values(deck).reduce((sum, card) => sum + card.copies, 0);
+            currentDeckName = deckName;
+            
+            renderDeck();
+            updateAllDeckButtons();
+            updateDeckNameDisplay();
+            
+            alert(`Mazo "${deckName}" cargado exitosamente!`);
+        } else {
+            alert(`Error al cargar el mazo: ${data.message}`);
+        }
+    } catch (err) {
+        console.error("Error cargando mazo:", err);
+        alert("Error de red al cargar el mazo.");
+    }
+}
+
+// Eliminar un mazo guardado
+async function deleteDeck(deckName) {
+    if (!confirm(`¿Estás seguro de que quieres eliminar el mazo "${deckName}"?`)) return;
+    
+    try {
+        const res = await fetch(`/api/decks/${encodeURIComponent(deckName)}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            await loadSavedDecks(); // Recargar la lista
+            alert("Mazo eliminado exitosamente!");
+            
+            // Si el mazo eliminado era el actual, limpiar
+            if (currentDeckName === deckName) {
+                currentDeckName = "";
+                updateDeckNameDisplay();
+            }
+        } else {
+            alert(`Error al eliminar el mazo: ${data.message}`);
+        }
+    } catch (err) {
+        console.error("Error eliminando mazo:", err);
+        alert("Error de red al eliminar el mazo.");
+    }
+}
+
+// Crear nuevo mazo (limpiar actual)
+function newDeck() {
+    if (Object.keys(deck).length > 0) {
+        if (!confirm("¿Quieres crear un nuevo mazo? Se perderá el mazo actual si no lo has guardado.")) {
+            return;
+        }
+    }
+    
+    deck = {};
+    totalDeckCards = 0;
+    currentDeckName = "";
+    
+    renderDeck();
+    updateAllDeckButtons();
+    updateDeckNameDisplay();
+}
+
+// Actualizar display del nombre del mazo actual
+function updateDeckNameDisplay() {
+    const nameDisplay = document.getElementById("currentDeckName");
+    if (nameDisplay) {
+        nameDisplay.textContent = currentDeckName || "Nuevo Mazo";
+        nameDisplay.className = `badge ${currentDeckName ? 'bg-success' : 'bg-secondary'} fs-6`;
+    }
+}
+
+// Renderizar lista de mazos guardados
+function renderSavedDecks() {
+    const container = document.getElementById("savedDecksContainer");
+    if (!container) return;
+    
+    container.innerHTML = "";
+    
+    if (savedDecks.length === 0) {
+        container.innerHTML = "<p class='text-muted text-center'>No tienes mazos guardados</p>";
+        return;
+    }
+    
+    savedDecks.forEach(deckInfo => {
+        const div = document.createElement("div");
+        div.className = "col-12 col-md-6 col-lg-4 mb-3";
+        
+        div.innerHTML = `
+            <div class="card deck-info-card">
+                <div class="card-body">
+                    <h6 class="card-title">${deckInfo.name}</h6>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            ${deckInfo.totalCards}/60 cartas<br>
+                            Creado: ${new Date(deckInfo.createdAt).toLocaleDateString()}
+                        </small>
+                    </p>
+                    <div class="btn-group w-100" role="group">
+                        <button class="btn btn-primary btn-sm" onclick="loadDeck('${deckInfo.name.replace(/'/g, "\\'")}')">
+                            Cargar
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteDeck('${deckInfo.name.replace(/'/g, "\\'")}')">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(div);
+    });
+}
+
+// === FUNCIONES EXISTENTES MODIFICADAS ===
+
+async function saveDeck() {
+    // Solo guarda temporalmente, no persiste con nombre
+    try {
+        const res = await fetch("/api/deck", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ deck })
+        });
+        const data = await res.json();
+        if (!data.success) console.error("Error guardando mazo temporal:", data.message);
+    } catch (err) {
+        console.error("Error en fetch /api/deck:", err);
+    }
+}
+
+// Función para cargar el deck temporal del servidor al iniciar
+async function loadTempDeck() {
+    try {
+        const res = await fetch("/api/deck", { credentials: "include" });
+        const data = await res.json();
+        if (data.success && data.deck) {
+            deck = data.deck;
+            totalDeckCards = Object.values(deck).reduce((sum, cardInfo) => sum + (cardInfo.copies || cardInfo), 0);
+            renderDeck();
+            updateAllDeckButtons();
+        }
+    } catch (err) {
+        console.error("Error cargando mazo temporal:", err);
+    }
+}
+
+function addToDeck(cardId, cardName, availableCopies, cardImage) {
+    if (totalDeckCards >= 60) {
+        alert("Ya tienes 60 cartas en el mazo.");
+        return;
+    }
+
+    const currentCopies = deck[cardId]?.copies || 0;
+    if (currentCopies >= 4) {
+        alert("No puedes tener más de 4 copias de una misma carta en el mazo.");
+        return;
+    }
+
+    if (currentCopies >= availableCopies) {
+        alert("No tienes suficientes copias disponibles en el inventario.");
+        return;
+    }
+
+    if (!deck[cardId]) {
+        deck[cardId] = { name: cardName, copies: 0, image: cardImage };
+    }
+
+    deck[cardId].copies++;
+    totalDeckCards++;
+
+    renderDeck();
+    
+    // Actualizar el botón de la carta específica
+    updateDeckButton(cardId, availableCopies);
+    
+    // Actualizar todos los botones del mazo
+    updateAllDeckButtons();
+    
+    // Guardar cambios temporalmente
+    saveDeck();
+}
+
+function removeFromDeck(cardId) {
+    if (!deck[cardId] || deck[cardId].copies <= 0) return;
+    
+    deck[cardId].copies--;
+    totalDeckCards--;
+    
+    if (deck[cardId].copies === 0) {
+        delete deck[cardId];
+    }
+    
+    renderDeck();
+    
+    // Encontrar la carta en el inventario para actualizar el botón
+    const card = currentInventoryCards.find(c => c.id === cardId);
+    if (card) {
+        updateDeckButton(cardId, card.quantity || 1);
+    }
+    
+    // Actualizar todos los botones del mazo
+    updateAllDeckButtons();
+    
+    // Guardar cambios temporalmente
+    saveDeck();
+}
+
+function renderDeck() {
+    const deckContainer = document.getElementById("deckContainer");
+    if (!deckContainer) return;
+    
+    deckContainer.innerHTML = "";
+
+    if (Object.keys(deck).length === 0) {
+        deckContainer.innerHTML = "<p class='text-center text-muted'>Tu mazo está vacío</p>";
+    } else {
+        Object.entries(deck).forEach(([cardId, { name, copies, image }]) => {
+            const div = document.createElement("div");
+            div.className = "col-6 col-sm-4 col-md-3 col-lg-2 mb-3";
+            div.innerHTML = `
+                <div class="card deck-card">
+                    <img src="${image}" class="card-img-top img-fluid" alt="${name}">
+                    <div class="card-body p-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary rounded-pill">${copies}</span>
+                            <button class="btn btn-outline-danger py-1 px-2" onclick="removeFromDeck('${cardId}')">
+                                <i class="fas fa-minus"></i> Quitar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            deckContainer.appendChild(div);
+        });
+    }
+
+    const deckCounter = document.getElementById("deckCounter");
+    if (deckCounter) {
+        deckCounter.innerHTML = `Cartas en el mazo: ${totalDeckCards}/60`;
+        deckCounter.className = `badge ${totalDeckCards === 60 ? 'bg-success' : totalDeckCards > 60 ? 'bg-danger' : 'bg-primary'} fs-6`;
+    }
+    
+    updateDeckNameDisplay();
+}
+
+
 
 // Función para ordenar el inventario
 function ordenarInventario(criteria) {
@@ -30,101 +358,87 @@ function ordenarInventario(criteria) {
             break;
         
         case 'rarity':
-          const rarityOrder = {
-            // Básicas
-            'Common'                       :  1,
-            'Uncommon'                     :  2,
-            'Classic Collection'           :  3,
-            'Promo'                        :  4,
+            const rarityOrder = {
+                // Básicas
+                'Common': 1,
+                'Uncommon': 2,
+                'Classic Collection': 3,
+                'Promo': 4,
+                // Raras «simples»
+                'Rare': 10,
+                'Radiant Rare': 11,
+                'Amazing Rare': 12,
+                'LEGEND': 13,
+                // Holo y derivados
+                'Rare Holo': 20,
+                'Trainer Gallery Rare Holo': 21,
+                'Rare Holo EX': 22,
+                'Rare Holo GX': 23,
+                'Rare Holo LVX': 24,
+                'Rare Holo Star': 25,
+                'Rare Holo V': 26,
+                'Rare Holo VMAX': 27,
+                'Rare Holo VSTAR': 28,
+                // Otras rarezas de la era BW-XY
+                'Rare Prime': 30,
+                'Rare BREAK': 31,
+                'Rare Prism Star': 32,
+                'Rare Shining': 33,
+                'Rare ACE': 34,
+                'ACE SPEC Rare': 35,
+                // Brillantes y shinies
+                'Rare Shiny': 40,
+                'Rare Shiny GX': 41,
+                'Shiny Rare': 42,
+                'Shiny Ultra Rare': 43,
+                // Sistema Scarlet & Violet
+                'Double Rare': 50,
+                'Illustration Rare': 60,
+                'Special Illustration Rare': 70,
+                'Ultra Rare': 80,
+                'Rare Ultra': 81,
+                'Hyper Rare': 90,
+                // Final de tabla
+                'Rare Rainbow': 95,
+                'Rare Secret': 96,
+                // Valor por defecto
+                'Desconocida': 999
+            };
 
-            // Raras «simples»
-            'Rare'                         : 10,
-            'Radiant Rare'                 : 11,
-            'Amazing Rare'                 : 12,
-            'LEGEND'                       : 13,
-
-            // Holo y derivados
-            'Rare Holo'                    : 20,
-            'Trainer Gallery Rare Holo'    : 21,
-            'Rare Holo EX'                 : 22,
-            'Rare Holo GX'                 : 23,
-            'Rare Holo LVX'                : 24,
-            'Rare Holo Star'               : 25,
-            'Rare Holo V'                  : 26,
-            'Rare Holo VMAX'               : 27,
-            'Rare Holo VSTAR'              : 28,
-
-            // Otras rarezas de la era BW-XY
-            'Rare Prime'                   : 30,
-            'Rare BREAK'                   : 31,
-            'Rare Prism Star'              : 32,
-            'Rare Shining'                 : 33,
-            'Rare ACE'                     : 34,
-            'ACE SPEC Rare'                : 35,
-
-            // Brillantes y shinies
-            'Rare Shiny'                   : 40,
-            'Rare Shiny GX'                : 41,
-            'Shiny Rare'                   : 42,
-            'Shiny Ultra Rare'             : 43,
-
-            // Sistema Scarlet & Violet
-            'Double Rare'                  : 50,
-            'Illustration Rare'            : 60,
-            'Special Illustration Rare'    : 70,
-            'Ultra Rare'                   : 80,
-            'Rare Ultra'                   : 81,   // (etiqueta antigua equivalente)
-            'Hyper Rare'                   : 90,
-
-            // Final de tabla
-            'Rare Rainbow'                 : 95,
-            'Rare Secret'                  : 96,
-
-            // Valor por defecto
-            'Desconocida'                  : 999
-          };
-
-          sortedCards.sort((a, b) => {
-            const rarityA = a.cardDetails?.rarity || 'Desconocida';
-            const rarityB = b.cardDetails?.rarity || 'Desconocida';
-            const orderA  = rarityOrder[rarityA] ?? 999;
-            const orderB  = rarityOrder[rarityB] ?? 999;
-            return orderA - orderB;
-          });
-          break;
-
+            sortedCards.sort((a, b) => {
+                const rarityA = a.cardDetails?.rarity || 'Desconocida';
+                const rarityB = b.cardDetails?.rarity || 'Desconocida';
+                const orderA = rarityOrder[rarityA] ?? 999;
+                const orderB = rarityOrder[rarityB] ?? 999;
+                return orderA - orderB;
+            });
+            break;
         
         case 'set':
-          sortedCards.sort((a, b) => {
-            // Tomamos el nombre del set desde donde esté disponible
-            const setA = (
-              a.cardDetails?.set?.name ||   // fuente principal
-              a.setName ||                  // por si lo guardas aparte
-              a.set ||                      // fallback genérico
-              ''
-            ).toLowerCase();
+            sortedCards.sort((a, b) => {
+                const setA = (
+                    a.cardDetails?.set?.name ||
+                    a.setName ||
+                    a.set ||
+                    ''
+                ).toLowerCase();
 
-            const setB = (
-              b.cardDetails?.set?.name ||
-              b.setName ||
-              b.set ||
-              ''
-            ).toLowerCase();
+                const setB = (
+                    b.cardDetails?.set?.name ||
+                    b.setName ||
+                    b.set ||
+                    ''
+                ).toLowerCase();
 
-            // Comparación alfabética insensible a tildes y mayúsculas
-            return setA.localeCompare(setB, undefined, { sensitivity: 'base' });
-          });
-          break;
+                return setA.localeCompare(setB, undefined, { sensitivity: 'base' });
+            });
+            break;
     }
 
-    // Renderizar las cartas ordenadas
     renderInventoryCards(sortedCards);
-    
-    // Actualizar botones activos
     updateSortButtons(criteria);
 }
 
-// Función para actualizar el estado visual de los botones
 function updateSortButtons(activeCriteria) {
     const buttons = document.querySelectorAll('.btn-group button');
     buttons.forEach(btn => {
@@ -141,7 +455,6 @@ function updateSortButtons(activeCriteria) {
     }
 }
 
-// Función separada para renderizar las cartas
 async function renderInventoryCards(cards) {
     const container = document.getElementById("inventoryContainer");
     container.innerHTML = "";
@@ -154,14 +467,17 @@ async function renderInventoryCards(cards) {
     for (const card of cards) {
         const cardDetails = card.cardDetails;
         
-        // Si la API externa falla, usar los datos locales
-        const name     = cardDetails?.name    || card.name;
-        const image    = cardDetails?.images?.large || card.image;
-        const setName  = cardDetails?.set?.name || 'Desconocido';        
-        const setId    = cardDetails?.set?.id   || '';
-        const types    = cardDetails?.types?.join(', ') || 'Desconocido'; 
-        const rarity   = cardDetails?.rarity     || 'Desconocida';       
+        const name = cardDetails?.name || card.name;
+        const image = cardDetails?.images?.large || card.image;
+        const setName = cardDetails?.set?.name || 'Desconocido';        
+        const setId = cardDetails?.set?.id || '';
+        const types = cardDetails?.types?.join(', ') || 'Desconocido'; 
+        const rarity = cardDetails?.rarity || 'Desconocida';       
         const quantity = card.quantity || 1;
+
+        const inDeckCount = deck[card.id]?.copies || 0;
+        const availableForDeck = quantity - inDeckCount;
+        const canAddToDeck = availableForDeck > 0 && inDeckCount < 4 && totalDeckCards < 60;
 
         const cardHTML = `
             <div class="col inventory-card-col">
@@ -192,23 +508,33 @@ async function renderInventoryCards(cards) {
                             </button>
                         </div>
                         <div class="d-flex align-items-center mt-2">
-                          <button class="btn btn-outline-danger w-100" onclick="toggleFavorite('${card.id}', ${card.favorite ?? false})">
-                            ${card.favorite ? "Quitar de favoritas ❤️" : "Marcar como favorita 🤍"}
-                          </button>
+                            <button class="btn btn-outline-danger w-100" onclick="toggleFavorite('${card.id}', ${card.favorite ?? false})">
+                                ${card.favorite ? "Quitar de favoritas ❤️" : "Marcar como favorita 🤍"}
+                            </button>
                         </div>
+                        <div class="d-flex align-items-center mt-2">
+                            <button id="deckBtn-${card.id}" class="btn ${canAddToDeck ? 'btn-secondary' : 'btn-outline-secondary'} w-100" 
+                                    onclick="addToDeck('${card.id}', '${name.replace(/'/g, "\\'")}', ${quantity}, '${image}')" 
+                                    ${!canAddToDeck ? 'disabled' : ''}>
+                                ${inDeckCount > 0 ? `En mazo (${inDeckCount}/${Math.min(4, quantity)})` : 'Añadir al mazo'}
+                            </button>
+                        </div>
+                        ${inDeckCount > 0 ? 
+                        `<div class="d-flex align-items-center mt-1">
+                            <small class="text-muted w-100 text-center">Disponibles: ${availableForDeck}</small>
+                        </div>` : ''}
                     </div>
                 </div>
             </div>
         `;
+
         container.insertAdjacentHTML('beforeend', cardHTML);
         document.getElementById(`detailBtn-${card.id}`).addEventListener('click', () => showCardDetails(cardDetails || card));
-        // Cambiar aquí: usar removeCard como función global o definirla arriba
         document.getElementById(`removeBtn-${card.id}`).addEventListener('click', async () => {
             await removeCard(card.id);
         });
     }
 
-    // Permitir guardar con Enter y feedback visual
     cards.forEach(card => {
         const input = document.getElementById(`quantity-${card.id}`);
         if (input) {
@@ -221,7 +547,36 @@ async function renderInventoryCards(cards) {
     });
 }
 
-// filepath: c:\Users\manue\OneDrive\Documentos\GitHub\P04-Hack-Tuah\public\js\inventory.js
+function updateDeckButton(cardId, totalQuantity) {
+    const button = document.getElementById(`deckBtn-${cardId}`);
+    if (!button) return;
+    
+    const inDeckCount = deck[cardId]?.copies || 0;
+    const availableForDeck = totalQuantity - inDeckCount;
+    const canAddToDeck = availableForDeck > 0 && inDeckCount < 4 && totalDeckCards < 60;
+    
+    button.className = `btn ${canAddToDeck ? 'btn-secondary' : 'btn-outline-secondary'} w-100`;
+    button.disabled = !canAddToDeck;
+    button.innerHTML = inDeckCount > 0 ? `En mazo (${inDeckCount}/${Math.min(4, totalQuantity)})` : 'Añadir al mazo';
+    
+    const cardBody = button.closest('.card-body');
+    const availableText = cardBody.querySelector('.text-muted');
+    if (availableText) {
+        availableText.innerHTML = `Disponibles: ${availableForDeck}`;
+    } else if (inDeckCount > 0) {
+        const availableDiv = document.createElement('div');
+        availableDiv.className = 'd-flex align-items-center mt-1';
+        availableDiv.innerHTML = `<small class="text-muted w-100 text-center">Disponibles: ${availableForDeck}</small>`;
+        button.parentElement.insertAdjacentElement('afterend', availableDiv);
+    }
+}
+
+function updateAllDeckButtons() {
+    currentInventoryCards.forEach(card => {
+        updateDeckButton(card.id, card.quantity || 1);
+    });
+}
+
 async function renderInventory() {
     const container = document.getElementById("inventoryContainer");
     container.innerHTML = "Cargando...";
@@ -236,7 +591,6 @@ async function renderInventory() {
         return;
     }
 
-    // Cargar detalles de todas las cartas y almacenarlas globalmente
     currentInventoryCards = [];
     for (const card of cards) {
         let cardDetails = null;
@@ -252,7 +606,6 @@ async function renderInventory() {
         });
     }
 
-    // Renderizar las cartas inicialmente
     await renderInventoryCards(currentInventoryCards);
     updateTypeSetFilterOptions();
 }
@@ -285,11 +638,22 @@ function showCardDetails(info) {
 }
 
 if (typeof document !== 'undefined') {
-    document.addEventListener("DOMContentLoaded", () => {
-        renderInventory();
-        renderTypeSetFilters();
-    });
+  document.addEventListener("DOMContentLoaded", async () => {
+    // 1) Carga el mazo temporal persistido en el servidor
+    await loadTempDeck();
+
+    // 2) Renderiza inventario y filtros
+    await renderInventory();
+    renderTypeSetFilters();
+
+    // 3) Renderiza el mazo (ya hidratado)
+    renderDeck();
+
+    // 4) Carga también la lista de mazos con nombre
+    await loadSavedDecks();
+  });
 }
+
 
 async function saveQuantity(cardId) {
     console.log("Guardando cantidad para carta:", cardId);
@@ -326,7 +690,25 @@ async function saveQuantity(cardId) {
             // Actualizar la cantidad en currentInventoryCards
             const cardIndex = currentInventoryCards.findIndex(c => c.id === cardId);
             if (cardIndex !== -1) {
+                const oldQuantity = currentInventoryCards[cardIndex].quantity;
                 currentInventoryCards[cardIndex].quantity = quantity;
+                
+                // Si se redujo la cantidad, revisar si hay copias en el mazo que necesiten ser removidas
+                if (quantity < oldQuantity && deck[cardId]) {
+                    const inDeckCount = deck[cardId].copies;
+                    if (inDeckCount > quantity) {
+                        const toRemove = inDeckCount - quantity;
+                        deck[cardId].copies = quantity;
+                        totalDeckCards -= toRemove;
+                        if (deck[cardId].copies === 0) {
+                            delete deck[cardId];
+                        }
+                        renderDeck();
+                    }
+                }
+                
+                // Actualizar el botón
+                updateDeckButton(cardId, quantity);
             }
         } else {
             console.error("Error del servidor:", data.message);
@@ -404,6 +786,9 @@ if (typeof document !== 'undefined') {
 function renderTypeSetFilters() {
     // Evita duplicados
     if (document.getElementById("typeSetFiltersRow")) return;
+
+    const cardIdInput = document.getElementById("cardIdInput");
+    if (!cardIdInput) return;
 
     const container = cardIdInput.parentElement;
     const filterRow = document.createElement("div");
