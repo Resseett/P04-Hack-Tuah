@@ -264,7 +264,7 @@
       },
       "rarity": "Desconocida",
       "price": "No disponible",
-      "quantity": 1,
+      "quantity": 3,
       "isTradable": true
     },
     {
@@ -325,6 +325,16 @@
       },
       "rarity": "Desconocida",
       "price": "No disponible",
+      "quantity": 1
+    },
+    {
+      "id": "pop4-2",
+      "name": "Deoxys δ",
+      "image": "https://images.pokemontcg.io/pop4/2_hires.png",
+      "types": [
+        "Colorless"
+      ],
+      "price": 16.02,
       "quantity": 1
     }
   ],
