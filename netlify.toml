@@ -2,10 +2,12 @@
 [build]
   command = "echo 'Build command not required'"
   publish = "frontend"
-
 [functions]
   directory = "netlify/functions"
-  external_node_modules = ["mongodb"]
+
+# Añade esta sección para decirle a Netlify que use Deno
+[functions."*"]
+  runtime = "deno"
 
 [[redirects]]
   from = "/api/*"

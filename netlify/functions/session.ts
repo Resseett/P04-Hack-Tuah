@@ -1,8 +1,7 @@
-// filepath: netlify/functions/session.ts
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import type { Context } from "@netlify/functions";
 import { getCookies } from "https://deno.land/std@0.224.0/http/cookie.ts";
 
-function handler(req: Request): Response {
+export default (req: Request, context: Context): Response => {
     const cookies = getCookies(req.headers);
     const username = cookies.loggedInUser;
 
@@ -15,6 +14,4 @@ function handler(req: Request): Response {
             headers: { "Content-Type": "application/json" },
         });
     }
-}
-
-serve(handler);
+};

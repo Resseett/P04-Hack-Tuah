@@ -1,12 +1,11 @@
-// filepath: netlify/functions/login.ts
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import type { Context } from "@netlify/functions";
 import { setCookie } from "https://deno.land/std@0.224.0/http/cookie.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
-import { MongoClient } from "mongodb";
+import { MongoClient } from "npm:mongodb@6.17.0";
 
 const client = new MongoClient(Deno.env.get("MONGO_URI") || "");
 
-async function handler(req: Request): Promise<Response> {
+export default async (req: Request, context: Context): Promise<Response> => {
   if (req.method !== "POST") {
     return new Response(null, { status: 405, statusText: "Method Not Allowed" });
   }
@@ -17,7 +16,7 @@ async function handler(req: Request): Promise<Response> {
     const usersCollection = client.db("Usuarios").collection("usuarios");
     const user = await usersCollection.findOne({ username });
 
-    if (user && await bcrypt.compare(password, user.password)) {
+    if (user && (await bcrypt.compare(password, user.password))) {
       const headers = new Headers();
       setCookie(headers, {
         name: "loggedInUser",
@@ -39,6 +38,4 @@ async function handler(req: Request): Promise<Response> {
   } finally {
     await client.close();
   }
-}
-
-serve(handler);
+};
