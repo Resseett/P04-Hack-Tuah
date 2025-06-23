@@ -1,4 +1,4 @@
-// filepath: netlify.toml
+# filepath: netlify.toml
 [build]
   command = "echo 'Build command not required'"
   publish = "frontend"
