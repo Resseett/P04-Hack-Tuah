@@ -209,6 +209,78 @@ router.delete("/api/decks/:name", async (ctx) => {
   ctx.response.body = { success: true };
 });
 
+
+// --- NUEVAS RUTAS PARA WISHLIST ---
+
+// Helper para obtener datos de una carta desde la API de Pokémon TCG
+async function fetchCardData(cardId: string) {
+    const response = await fetch(`https://api.pokemontcg.io/v2/cards/${cardId}`);
+    if (!response.ok) return null;
+    const { data } = await response.json();
+    return data;
+}
+
+// Obtener la wishlist del usuario
+router.get("/api/wishlist", async (ctx) => {
+    const userId = await getUserIdFromCookie(ctx);
+    if (!userId) { ctx.response.status = 401; return; }
+
+    const { data: wishes, error } = await supabase
+        .from('trade_wishes')
+        .select('card_id')
+        .eq('user_id', userId);
+
+    if (error) {
+        ctx.response.status = 500;
+        ctx.response.body = { error: "Error al obtener la wishlist" };
+        return;
+    }
+
+    // Para cada card_id, obtener los detalles completos de la carta
+    const cardDetailsPromises = wishes.map(wish => fetchCardData(wish.card_id));
+    const wishedCards = (await Promise.all(cardDetailsPromises)).filter(Boolean); // Filtra nulos si alguna carta no se encuentra
+
+    ctx.response.body = wishedCards;
+});
+
+// Añadir una carta a la wishlist
+router.post("/api/wishlist/add", async (ctx) => {
+    const userId = await getUserIdFromCookie(ctx);
+    if (!userId) { ctx.response.status = 401; return; }
+
+    const { cardId } = await ctx.request.body().value;
+    if (!cardId) { ctx.response.status = 400; return; }
+
+    // Opcional: Verificar si la carta ya está en la wishlist para no duplicarla
+    const { data: existing } = await supabase.from('trade_wishes').select().match({ user_id: userId, card_id: cardId });
+    if (existing && existing.length > 0) {
+        ctx.response.body = { success: true, message: "La carta ya estaba en la wishlist." };
+        return;
+    }
+
+    const { error } = await supabase.from('trade_wishes').insert({ user_id: userId, card_id: cardId });
+    if (error) {
+        ctx.response.status = 500;
+        ctx.response.body = { error: "Error al añadir a la wishlist" };
+        return;
+    }
+    ctx.response.body = { success: true };
+});
+
+// Eliminar una carta de la wishlist
+router.post("/api/wishlist/remove", async (ctx) => {
+    const userId = await getUserIdFromCookie(ctx);
+    if (!userId) { ctx.response.status = 401; return; }
+
+    const { cardId } = await ctx.request.body().value;
+    if (!cardId) { ctx.response.status = 400; return; }
+
+    await supabase.from('trade_wishes').delete().match({ user_id: userId, card_id: cardId });
+    ctx.response.body = { success: true };
+});
+
+
+
 router.get("/card/:id", async (ctx) => {
     const cardId = ctx.params.id;
     const apiUrl = `https://api.pokemontcg.io/v2/cards/${cardId}`;

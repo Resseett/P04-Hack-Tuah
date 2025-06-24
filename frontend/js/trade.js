@@ -1,173 +1,132 @@
-// trade.js
+document.addEventListener("DOMContentLoaded", () => {
+    loadMyTradableCards();
+    loadWishlist();
 
-// Ejecutar al cargar la página: cargar listados y configurar formularios
-window.addEventListener("DOMContentLoaded", () => {
-  cargarCartasDeseadas();
-  cargarCartasIntercambiables();
+    const addBtn = document.getElementById('addWishlistBtn');
+    const cardInput = document.getElementById('wishlistCardInput');
 
-  // Formulario: añadir carta deseada ("Quiero obtener")
-  const formDeseadas = document.getElementById("formDeseadas");
-  if (formDeseadas) {
-    formDeseadas.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const input = document.getElementById("cardDeseada");
-      const cardId = input.value.trim();
-      if (!cardId) return;
-
-      try {
-        const res = await fetch("/api/trade/add", {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cardId }),
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast("Carta añadida a tu colección deseada", "success");
-          input.value = "";
-          cargarCartasDeseadas();
-        } else {
-          showToast(`Error: ${data.message}`, "error");
+    addBtn.addEventListener('click', addToWishlist);
+    cardInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            addToWishlist();
         }
-      } catch (err) {
-        console.error("Error al añadir carta deseada:", err);
-        showToast("Error al añadir carta deseada.", "error");
-      }
     });
-  }
 });
 
-// Sección "Quiero obtener": listar cartas deseadas
-async function cargarCartasDeseadas() {
-  const container = document.getElementById("coleccionContainer");
-  container.innerHTML = "Cargando…";
-
-  try {
-    const res = await fetch("/api/trade/list", { credentials: "include" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { success, cards } = await res.json();
-    if (!success) {
-      container.innerHTML = "Error al cargar colección deseada.";
-      return;
+async function fetchFromServer(url, options = {}) {
+    try {
+        const defaultOptions = { credentials: 'include' };
+        const res = await fetch(url, { ...defaultOptions, ...options });
+        if (!res.ok) {
+            console.error(`Error en la petición a ${url}:`, res.status);
+            return null;
+        }
+        return res.json();
+    } catch (err) {
+        console.error(`Fallo de red en ${url}:`, err);
+        return null;
     }
-    container.innerHTML = cards.length
-      ? ""
-      : "<p>No tienes cartas deseadas.</p>";
-
-    for (const cardId of cards) {
-      let details;
-      try {
-        const r2 = await fetch(`/card/${cardId}`, { credentials: "include" });
-        const json2 = await r2.json();
-        details = json2.data;
-      } catch {
-        details = { images: { small: "" }, set: { name: "" }, number: cardId };
-      }
-
-      const col = document.createElement("div");
-      col.className = "col-6 col-md-4 col-lg-3 col-xl-2 mb-3";
-      col.innerHTML = `
-        <div class="card h-100 inventory-card text-center shadow-sm">
-          <img src="${details.images.small}" class="card-img-top p-1" alt="${details.name}" style="height:100px; object-fit:contain;">
-          <div class="card-body p-1">
-            <p class="card-text mb-1"><strong>Set:</strong> ${details.set.name}</p>
-            <p class="card-text"><strong>N°:</strong> ${details.number}</p>
-            <p class="card-text"><strong>Precio:</strong> ${details.cardmarket?.prices?.averageSellPrice?.toFixed(2) ?? "No disponible"} USD</p>
-          </div>
-        </div>`;
-      container.appendChild(col);
-    }
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = "Error al cargar colección deseada.";
-  }
 }
 
-// Sección "Para intercambio": listar cartas disponibles para intercambiar
-async function cargarCartasIntercambiables() {
-  const container = document.getElementById("cartasIntercambiablesContainer");
-  container.innerHTML = "Cargando…";
+// Carga y muestra las cartas que el usuario ha marcado como intercambiables
+async function loadMyTradableCards() {
+    const container = document.getElementById('myTradableCardsContainer');
+    container.innerHTML = '<p>Cargando tus cartas...</p>';
 
-  try {
-    const res = await fetch("/api/inventory", { credentials: "include" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { success, cards } = await res.json();
-    if (!success) {
-      container.innerHTML = "Error al cargar cartas intercambiables.";
-      return;
+    const inventory = await fetchFromServer('/api/inventory');
+    if (!inventory) {
+        container.innerHTML = '<p class="text-danger">Error al cargar tu inventario.</p>';
+        return;
     }
 
-    const tradables = cards.filter(c => c.isTradable === true);
-    container.innerHTML = tradables.length
-      ? ""
-      : "<p>No tienes cartas disponibles para intercambio.</p>";
+    const tradableCards = inventory.filter(card => card.is_tradable);
 
-    for (const card of tradables) {
-      let details;
-      try {
-        const r2 = await fetch(`/card/${card.id}`, { credentials: "include" });
-        const json2 = await r2.json();
-        details = json2.data;
-      } catch {
-        details = { images: { small: "" }, set: { name: "" }, number: card.id };
-      }
-
-      const col = document.createElement("div");
-      col.className = "col-6 col-md-4 col-lg-3 col-xl-2 mb-3";
-      col.innerHTML = `
-        <div class="card h-100 inventory-card text-center shadow-sm">
-          <img src="${details.images.small}" class="card-img-top p-1" alt="${details.name}" style="height:100px; object-fit:contain;">
-          <div class="card-body p-1">
-            <p class="card-text mb-1"><strong>Set:</strong> ${details.set.name}</p>
-            <p class="card-text"><strong>N°:</strong> ${details.number}</p>
-            <p class="card-text"><strong>Precio:</strong> ${details.cardmarket?.prices?.averageSellPrice?.toFixed(2) ?? "No disponible"} USD</p>
-          </div>
-        </div>`;
-      container.appendChild(col);
+    if (tradableCards.length === 0) {
+        container.innerHTML = '<p>No tienes ninguna carta marcada como intercambiable.</p>';
+        return;
     }
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = "Error al cargar cartas intercambiables.";
-  }
+
+    container.innerHTML = '';
+    tradableCards.forEach(card => {
+        container.innerHTML += `
+            <div class="col">
+                <div class="card h-100">
+                    <img src="${card.images.small}" class="card-img-top" alt="${card.name}">
+                    <div class="card-body p-2">
+                        <h6 class="card-title small">${card.name}</h6>
+                        <p class="card-text small text-muted">Cantidad: ${card.quantity}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
 }
 
-// Función de feedback (puede cambiarse por un toast)
-function showToast(message, type = "success") {
-  const toastRoot = document.getElementById("toast-root");
-  if (!toastRoot) {
-    alert(message); // Fallback
-    return;
-  }
+// Carga y muestra la wishlist del usuario
+async function loadWishlist() {
+    const container = document.getElementById('wishlistContainer');
+    container.innerHTML = '<p>Cargando tu wishlist...</p>';
 
-  const toast = document.createElement("div");
-  toast.className = `toast align-items-center text-bg-${type === "success" ? "success" : "danger"} border-0 show`;
-  toast.style.position = "fixed";
-  toast.style.bottom = "20px";
-  toast.style.right = "20px";
-  toast.style.zIndex = "9999";
-  toast.innerHTML = `
-      <div class="d-flex">
-          <div class="toast-body">${message}</div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-      </div>
-  `;
-  toastRoot.appendChild(toast);
+    const wishedCards = await fetchFromServer('/api/wishlist');
+    if (!wishedCards) {
+        container.innerHTML = '<p class="text-danger">Error al cargar tu wishlist.</p>';
+        return;
+    }
 
-  setTimeout(() => {
-      toast.remove();
-  }, 3000);
+    if (wishedCards.length === 0) {
+        container.innerHTML = '<p>Tu wishlist está vacía.</p>';
+        return;
+    }
+
+    container.innerHTML = '';
+    wishedCards.forEach(card => {
+        container.innerHTML += `
+            <div class="col">
+                <div class="card h-100">
+                    <img src="${card.images.small}" class="card-img-top" alt="${card.name}">
+                    <div class="card-body p-2">
+                        <h6 class="card-title small">${card.name}</h6>
+                        <button class="btn btn-danger btn-sm w-100" onclick="removeFromWishlist('${card.id}')">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
 }
 
+// Añade una carta a la wishlist
+async function addToWishlist() {
+    const cardInput = document.getElementById('wishlistCardInput');
+    const cardId = cardInput.value.trim();
+    if (!cardId) return;
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    cargarCartasDeseadas,
-    cargarCartasIntercambiables,
-    showToast
-  };
+    const result = await fetchFromServer('/api/wishlist/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardId })
+    });
+
+    if (result && result.success) {
+        cardInput.value = '';
+        await loadWishlist(); // Recarga la wishlist para mostrar la nueva carta
+    } else {
+        alert('Error al añadir la carta. Verifica que el ID sea correcto.');
+    }
 }
 
-// En el navegador, seguimos teniendo las funciones en ámbito global:
-window.cargarCartasDeseadas = cargarCartasDeseadas;
-window.cargarCartasIntercambiables = cargarCartasIntercambiables;
-window.showToast = showToast;
+// Elimina una carta de la wishlist
+async function removeFromWishlist(cardId) {
+    if (!confirm(`¿Seguro que quieres eliminar "${cardId}" de tu wishlist?`)) return;
+
+    const result = await fetchFromServer('/api/wishlist/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardId })
+    });
+
+    if (result && result.success) {
+        await loadWishlist(); // Recarga la wishlist
+    } else {
+        alert('Error al eliminar la carta.');
+    }
+}

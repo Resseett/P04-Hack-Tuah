@@ -1,44 +1,45 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Intercambio</title>
-
-  <!-- Bootstrap y estilos personalizados -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link rel="stylesheet" href="/components/pokedex_styles.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intercambios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/components/pokedex_styles.css">
 </head>
 <body>
-  <!-- Navbar cargado dinámicamente -->
-  <div id="navbar"></div>
+    <div id="navbar"></div>
 
-  <!-- Contenido principal -->
-  <div class="container mt-5">
-    <div class="card shadow p-4">
-      <h1 class="text-center gradient-text mb-4">Cartas que quiero intercambiar</h1>
+    <main class="container mt-5">
+        <h1 class="mb-4">Centro de Intercambios</h1>
 
-      <!-- Formulario para agregar carta -->
-      <form id="formDeseadas" class="mb-3">
-        <label for="cardDeseada" class="form-label">ID de la carta deseada:</label>
-        <input type="text" id="cardDeseada" class="form-control" placeholder="Ej: xy7-54">
-        <button type="submit" class="btn btn-primary mt-2 w-100">Agregar a la colección</button>
-      </form>
+        <div class="row">
+            <!-- Columna para tus cartas ofrecidas -->
+            <div class="col-md-6">
+                <h4>Cartas que ofreces para intercambiar</h4>
+                <p class="text-muted">Puedes marcar cartas como intercambiables desde tu inventario.</p>
+                <div id="myTradableCardsContainer" class="row row-cols-2 row-cols-lg-3 g-3">
+                    <!-- Tus cartas intercambiables se cargarán aquí -->
+                </div>
+            </div>
 
-      <!-- Lista de cartas deseadas -->
-      <h4 class="mt-4">Mi colección de cartas buscadas:</h4>
-      <div id="coleccionContainer" class="row g-3 mt-2"></div>
-      <h4 class="mt-5">Cartas que tengo disponibles para intercambiar:</h4>
-      <div id="cartasIntercambiablesContainer" class="row g-3 mt-2"></div>
-    </div>
-  </div>
+            <!-- Columna para tus cartas buscadas (Wishlist) -->
+            <div class="col-md-6">
+                <h4>Cartas que buscas (Wishlist)</h4>
+                <div class="input-group mb-3">
+                    <input type="text" id="wishlistCardInput" class="form-control" placeholder="ID de la carta (ej: sv3-151)">
+                    <button class="btn btn-primary" type="button" id="addWishlistBtn">Añadir a la Wishlist</button>
+                </div>
+                <div id="wishlistContainer" class="row row-cols-2 row-cols-lg-3 g-3">
+                    <!-- Tu wishlist se cargará aquí -->
+                </div>
+            </div>
+        </div>
+    </main>
 
-  
-
-  <!-- Scripts -->
-  <script src="/js/trade.js"></script>
-  <script src="/js/navbar.js"></script>
-  <script src="/js/auth.js"></script>
-  <div id="toast-root"></div>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/trade.js"></script>
 </body>
 </html>
