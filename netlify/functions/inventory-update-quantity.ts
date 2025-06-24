@@ -1,0 +1,20 @@
+import { getSupabaseClient, corsHeaders, getUserIdFromRequest } from './_shared.ts';
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  try {
+    const userId = await getUserIdFromRequest(req);
+    if (!userId) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers: corsHeaders });
+    
+    const { cardId, quantity } = await req.json();
+    if (!cardId || typeof quantity !== 'number' || quantity < 1) throw new Error("Parámetros inválidos");
+
+    const supabase = getSupabaseClient();
+    await supabase.from('inventories').update({ quantity }).match({ user_id: userId, card_id: cardId });
+
+    return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: corsHeaders });
+  }
+});

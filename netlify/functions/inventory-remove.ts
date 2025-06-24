@@ -6,13 +6,15 @@ Deno.serve(async (req) => {
   try {
     const userId = await getUserIdFromRequest(req);
     if (!userId) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers: corsHeaders });
+    
+    const { cardId } = await req.json();
+    if (!cardId) throw new Error("cardId es requerido");
 
     const supabase = getSupabaseClient();
-    const { data, error } = await supabase.from('decks').select('*').eq('user_id', userId);
-    if (error) throw error;
+    await supabase.from('inventories').delete().match({ user_id: userId, card_id: cardId });
 
-    return new Response(JSON.stringify(data || []), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: corsHeaders });
+    return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: corsHeaders });
   }
 });

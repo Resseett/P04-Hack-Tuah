@@ -1,52 +1,38 @@
-document.addEventListener("navbar-ready", async () => {
-    async function waitForUserSession(retries = 10, delay = 100) {
-        for (let i = 0; i < retries; i++) {
-            const res = await fetch("/api/session", { credentials: "include" }); // 🔥 Incluir credenciales
-            const data = await res.json();
-            if (data.loggedInUser) return data.loggedInUser;
-            await new Promise((r) => setTimeout(r, delay));
-        }
+// filepath: c:\Users\manue\OneDrive\Documentos\GitHub\P04-Hack-Tuah\frontend\js\auth.js
+const SUPABASE_SESSION_KEY = 'supabase.auth.token';
+
+function getSession() {
+    const sessionData = localStorage.getItem(SUPABASE_SESSION_KEY);
+    if (!sessionData) return null;
+    try {
+        return JSON.parse(sessionData);
+    } catch {
         return null;
     }
+}
 
-    try {
-        const username = await waitForUserSession();
+function saveSession(session) {
+    localStorage.setItem(SUPABASE_SESSION_KEY, JSON.stringify(session));
+}
 
-        const userStatusElement = document.getElementById("userStatus");
-        const welcomeText = document.getElementById("welcomeText");
-        const loginBtn = document.getElementById("loginBtn");
-        const logoutBtn = document.getElementById("logoutBtn");
+function clearSession() {
+    localStorage.removeItem(SUPABASE_SESSION_KEY);
+}
 
-        const indexLoginBtn = document.querySelector(".btn-primary[href='/login']");
-        const indexSignupBtn = document.querySelector(".btn-secondary[href='/signup']");
+async function checkAuth() {
+    const session = getSession();
+    const userIsLoggedIn = session && session.access_token;
+    const currentPage = window.location.pathname.split('/').pop();
+    const authPages = ['login.html', 'signup.html'];
 
-        const loggedIn = !!username;
-
-        if (userStatusElement) {
-            userStatusElement.textContent = loggedIn
-                ? `Bienvenido, ${username}`
-                : "No has iniciado sesión";
-        }
-
-        if (welcomeText) {
-            welcomeText.textContent = loggedIn
-                ? `Bienvenido, ${username}, ¿Qué carta buscas hoy día?`
-                : "¿Qué carta buscas hoy día?";
-        }
-
-        if (loginBtn) loginBtn.style.display = loggedIn ? "none" : "inline";
-        if (logoutBtn) logoutBtn.style.display = loggedIn ? "inline" : "none";
-
-        if (indexLoginBtn) indexLoginBtn.style.display = loggedIn ? "none" : "inline-block";
-        if (indexSignupBtn) indexSignupBtn.style.display = loggedIn ? "none" : "inline-block";
-
-        if (logoutBtn) {
-            logoutBtn.addEventListener("click", async () => {
-                await fetch("/api/logout", { method: "POST", credentials: "include" });
-                window.location.reload();
-            });
-        }
-    } catch (err) {
-        console.error("Error verificando sesión:", err);
+    if (userIsLoggedIn && authPages.includes(currentPage)) {
+        // Si el usuario está logueado y en una página de login/signup, lo redirige al inventario
+        window.location.href = '/inventory.html';
+    } else if (!userIsLoggedIn && !authPages.includes(currentPage)) {
+        // Si el usuario NO está logueado y NO está en una página de login/signup, lo redirige al login
+        window.location.href = '/login.html';
     }
-});
+}
+
+// Ejecuta la comprobación de autenticación en cada carga de página
+document.addEventListener('DOMContentLoaded', checkAuth);

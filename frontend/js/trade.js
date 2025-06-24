@@ -14,14 +14,31 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function fetchFromServer(url, options = {}) {
+    const session = getSession(); // Función de auth.js
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    };
+
+    if (session && session.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+    }
+
     try {
-        const defaultOptions = { credentials: 'include' };
-        const res = await fetch(url, { ...defaultOptions, ...options });
+        const res = await fetch(url, { ...options, headers, credentials: 'omit' });
         if (!res.ok) {
+            if (res.status === 401) { // Token inválido o expirado
+                clearSession();
+                window.location.href = '/login.html';
+            }
             console.error(`Error en la petición a ${url}:`, res.status);
             return null;
         }
-        return res.json();
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            return res.json();
+        }
+        return { success: true };
     } catch (err) {
         console.error(`Fallo de red en ${url}:`, err);
         return null;
@@ -100,9 +117,8 @@ async function addToWishlist() {
     const cardId = cardInput.value.trim();
     if (!cardId) return;
 
-    const result = await fetchFromServer('/api/wishlist/add', {
+    const result = await fetchFromServer('/api/wishlist-add', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cardId })
     });
 
@@ -118,9 +134,8 @@ async function addToWishlist() {
 async function removeFromWishlist(cardId) {
     if (!confirm(`¿Seguro que quieres eliminar "${cardId}" de tu wishlist?`)) return;
 
-    const result = await fetchFromServer('/api/wishlist/remove', {
+    const result = await fetchFromServer('/api/wishlist-remove', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cardId })
     });
 

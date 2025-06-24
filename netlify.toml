@@ -1,0 +1,16 @@
+[build]
+  # Directorio que Netlify servirá como tu sitio web.
+  publish = "frontend/"
+  # Directorio donde vivirán tus funciones serverless.
+  functions = "netlify/functions/"
+
+[functions]
+  # Especifica que usaremos el runtime de Deno para nuestras funciones.
+  deno_import_map = "deno.json"
+
+# Esta sección es clave. Redirige todas las llamadas a /api/... 
+# a las funciones serverless correspondientes.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200

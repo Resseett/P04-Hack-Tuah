@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector("form");
 
     form.addEventListener("submit", async (event) => {
-        event.preventDefault(); // 🔥 ¡Evitar que se envíe el formulario tradicional!
+        event.preventDefault();
 
         const username = document.getElementById("user").value;
         const password = document.getElementById("password").value;
@@ -11,20 +11,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch("/api/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                credentials: "include", // 🔥 Cookies para sesión
+                // Ya no se usa 'credentials: include', la sesión se maneja con tokens.
                 body: JSON.stringify({ username, password })
             });
 
             const data = await response.json();
 
-            if (data.success) {
-                // Aquí deberías mostrar tu toast de éxito
+            // La respuesta de Supabase es 'ok' y contiene un access_token en caso de éxito.
+            if (response.ok && data.access_token) {
+                saveSession(data); // Guarda la sesión completa en localStorage (función de auth.js)
                 showToast("Inicio de sesión exitoso", "success");
                 setTimeout(() => {
-                    window.location.href = "/";
+                    window.location.href = "/inventory.html"; // Redirige al inventario
                 }, 1500);
             } else {
-                showToast(data.message || "Usuario o contraseña incorrectos", "error");
+                showToast(data.error_description || data.error || "Usuario o contraseña incorrectos", "error");
             }
         } catch (error) {
             showToast("Error en el servidor", "error");
@@ -33,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Función para mostrar un toast
+// Función para mostrar un toast (debe estar disponible o importada)
 function showToast(message, type) {
     const toast = document.createElement("div");
     toast.className = `toast align-items-center text-bg-${type === "success" ? "success" : "danger"} border-0 show`;

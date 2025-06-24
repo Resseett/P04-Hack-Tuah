@@ -6,21 +6,33 @@ let currentDeckName = "Nuevo Mazo";
 
 // --- Funciones de API (Inventario y Mazos) ---
 async function fetchFromServer(url, options = {}) {
+    const session = getSession(); // Función de auth.js
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    };
+
+    if (session && session.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+    }
+
     try {
-        const defaultOptions = { credentials: 'include' };
-        const res = await fetch(url, { ...defaultOptions, ...options });
+        const res = await fetch(url, { ...options, headers, credentials: 'omit' });
         if (!res.ok) {
-            console.error(`Error en la petición a ${url}:`, res.status, await res.text());
+            if (res.status === 401) { // Token inválido o expirado
+                clearSession();
+                window.location.href = '/login.html';
+            }
+            console.error(`Error en la petición a ${url}:`, res.status);
             return null;
         }
-        // Si la respuesta no tiene contenido (ej. en un DELETE), devuelve un objeto de éxito
         const contentType = res.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
             return res.json();
         }
         return { success: true };
     } catch (err) {
-        console.error(`Fallo de red o de parseo en ${url}:`, err);
+        console.error(`Fallo de red en ${url}:`, err);
         return null;
     }
 }
@@ -29,14 +41,12 @@ async function updateQuantity(cardId, quantity) {
     const newQuantity = parseInt(quantity, 10);
     if (isNaN(newQuantity) || newQuantity < 1) {
         alert("La cantidad debe ser un número mayor o igual a 1.");
-        // Revertir el valor en la UI
         const card = currentInventoryCards.find(c => c.id === cardId);
         document.getElementById(`qty-${cardId}`).value = card.quantity;
         return;
     }
-    await fetchFromServer('/api/inventory/update-quantity', {
+    await fetchFromServer('/api/inventory-update-quantity', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cardId, quantity: newQuantity })
     });
     const card = currentInventoryCards.find(c => c.id === cardId);
@@ -45,9 +55,8 @@ async function updateQuantity(cardId, quantity) {
 }
 
 async function toggleFavorite(cardId, currentState) {
-    await fetchFromServer('/api/inventory/toggle-favorite', {
+    await fetchFromServer('/api/inventory-toggle-favorite', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cardId, isFavorite: !currentState })
     });
     const card = currentInventoryCards.find(c => c.id === cardId);
@@ -56,9 +65,8 @@ async function toggleFavorite(cardId, currentState) {
 }
 
 async function toggleTradable(cardId, currentState) {
-    await fetchFromServer('/api/inventory/toggle-tradable', {
+    await fetchFromServer('/api/inventory-toggle-tradable', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cardId, isTradable: !currentState })
     });
     const card = currentInventoryCards.find(c => c.id === cardId);
@@ -68,12 +76,11 @@ async function toggleTradable(cardId, currentState) {
 
 async function removeCard(cardId) {
     if (!confirm("¿Estás seguro de que quieres eliminar esta carta de tu inventario?")) return;
-    await fetchFromServer('/api/inventory/remove', {
+    await fetchFromServer('/api/inventory-remove', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cardId })
     });
-    await renderAll(); // Recarga todo desde cero
+    await renderAll();
 }
 
 // --- Funciones de Gestión de Mazos ---
@@ -118,9 +125,8 @@ async function saveDeckWithName() {
     if (Object.keys(deck).length === 0) { alert("El mazo está vacío."); return; }
 
     const deckCardIds = Object.keys(deck).flatMap(cardId => Array(deck[cardId].copies).fill(cardId));
-    const result = await fetchFromServer('/api/decks/save', {
+    const result = await fetchFromServer('/api/decks-save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: deckName.trim(), cards: deckCardIds })
     });
 
@@ -141,7 +147,7 @@ async function loadSavedDecks() {
 
 async function loadDeck(deckName) {
     if (!confirm(`¿Cargar el mazo "${deckName}"? Los cambios no guardados en el mazo actual se perderán.`)) return;
-    const deckData = await fetchFromServer('/api/decks/' + deckName);
+    const deckData = await fetchFromServer('/api/decks-name/' + deckName);
     if (!deckData) { alert("Error al cargar el mazo."); return; }
     
     deck = {};
@@ -163,7 +169,7 @@ async function loadDeck(deckName) {
 
 async function deleteDeck(deckName) {
     if (!confirm(`¿Seguro que quieres eliminar el mazo "${deckName}"?`)) return;
-    await fetchFromServer('/api/decks/' + deckName, { method: 'DELETE' });
+    await fetchFromServer('/api/decks-name/' + deckName, { method: 'DELETE' });
     await loadSavedDecks();
 }
 
