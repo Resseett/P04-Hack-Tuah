@@ -526,5 +526,6 @@ router.post("/api/inventory/tradable", async (ctx) => {
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-console.log("🚀 Servidor corriendo en http://localhost:8000");
-await app.listen({ port: 8000 });
+const PORT = parseInt(Deno.env.get("PORT") || "8000");
+console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+await app.listen({ port: PORT });
