@@ -1,0 +1,15 @@
+# filepath: netlify.toml
+[build]
+  command = "echo 'Build command not required'"
+  publish = "frontend"
+[functions]
+  directory = "netlify/functions"
+
+# Añade esta sección para decirle a Netlify que use Deno
+[functions."*"]
+  runtime = "deno"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
